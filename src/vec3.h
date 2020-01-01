@@ -13,7 +13,6 @@ struct vec3
 	constexpr vec3 () : x (0), y (0), z (0) {}
 	constexpr vec3 (float x, float y, float z) : x (x), y (y), z (z) {}
 
-
 	const vec3& operator+ () const { return *this; }
 	vec3 operator- () const { return vec3 (-x, -y, -z); }
 

@@ -6,4 +6,4 @@ add_executable(cert src/main.cpp)
 
 set_property(TARGET cert PROPERTY CXX_STANDARD 20)
 
-target_compile_options(cert PUBLIC -fconstexpr-steps=1271242000)
+target_compile_options(cert PUBLIC -std=c++2a -fconstexpr-steps=2147483647)

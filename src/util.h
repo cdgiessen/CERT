@@ -1,6 +1,7 @@
 #pragma once
 
 #include <limits>
+#include <new>
 
 template <class T> constexpr T const& min (const T& a, const T& b) { return (b < a) ? b : a; }
 template <class T> constexpr T const& max (const T& a, const T& b) { return (a < b) ? b : a; }
@@ -25,7 +26,6 @@ constexpr bool nearly_equal (const float a,
 
 constexpr float sqrt (float res)
 {
-
 	float l = 1;
 	float r = res;
 
@@ -43,3 +43,29 @@ constexpr float sqrt (float res)
 	}
 	return r;
 }
+
+template <typename T> class DynArr
+{
+	T* data = nullptr;
+	std::size_t size = 0;
+
+	public:
+	constexpr DynArr () {}
+
+	constexpr void resize (std::size_t new_size)
+	{
+		T* temp = new float[new_size];
+		for (int i = 0; i < size; i++)
+		{
+			if (i < new_size) temp[i] = data[i];
+		}
+		delete[] data;
+		size = new_size;
+		data = temp;
+	}
+
+
+	T const& at (std::size_t index) const { return data[index]; }
+
+	//~DynArr () { delete[] data; }
+};
