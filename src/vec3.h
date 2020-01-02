@@ -4,24 +4,24 @@
 
 #include "util.h"
 
-struct vec3
+struct Vec3
 {
 	float x = 0;
 	float y = 0;
 	float z = 0;
 
-	constexpr vec3 () : x (0), y (0), z (0) {}
-	constexpr vec3 (float x, float y, float z) : x (x), y (y), z (z) {}
+	constexpr Vec3 () : x (0), y (0), z (0) {}
+	constexpr Vec3 (float x, float y, float z) : x (x), y (y), z (z) {}
 
-	const vec3& operator+ () const { return *this; }
-	vec3 operator- () const { return vec3 (-x, -y, -z); }
+	const Vec3& operator+ () const { return *this; }
+	Vec3 operator- () const { return Vec3 (-x, -y, -z); }
 
-	vec3& operator+= (const vec3& v2);
-	vec3& operator-= (const vec3& v2);
-	vec3& operator*= (const vec3& v2);
-	vec3& operator/= (const vec3& v2);
-	vec3& operator*= (const float t);
-	vec3& operator/= (const float t);
+	Vec3& operator+= (const Vec3& v2);
+	Vec3& operator-= (const Vec3& v2);
+	Vec3& operator*= (const Vec3& v2);
+	Vec3& operator/= (const Vec3& v2);
+	Vec3& operator*= (const float t);
+	Vec3& operator/= (const float t);
 
 	constexpr inline float length () const { return sqrt (x * x + y * y + z * z); }
 	constexpr inline float squared_length () const { return x * x + y * y + z * z; }
@@ -34,36 +34,36 @@ struct vec3
 	}
 };
 
-constexpr vec3 operator+ (const vec3& v1, const vec3& v2)
+constexpr Vec3 operator+ (const Vec3& v1, const Vec3& v2)
 {
-	return vec3 (v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+	return Vec3 (v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 }
-constexpr vec3 operator- (const vec3& v1, const vec3& v2)
+constexpr Vec3 operator- (const Vec3& v1, const Vec3& v2)
 {
-	return vec3 (v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+	return Vec3 (v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
 }
-constexpr vec3 operator* (const vec3& v1, const vec3& v2)
+constexpr Vec3 operator* (const Vec3& v1, const Vec3& v2)
 {
-	return vec3 (v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+	return Vec3 (v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
 }
-constexpr vec3 operator/ (const vec3& v1, const vec3& v2)
+constexpr Vec3 operator/ (const Vec3& v1, const Vec3& v2)
 {
-	return vec3 (v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
+	return Vec3 (v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
 }
-constexpr vec3 operator* (const vec3& v1, const float t)
+constexpr Vec3 operator* (const Vec3& v1, const float t)
 {
-	return vec3 (v1.x * t, v1.y * t, v1.z * t);
+	return Vec3 (v1.x * t, v1.y * t, v1.z * t);
 }
-constexpr vec3 operator/ (const vec3& v1, const float t)
+constexpr Vec3 operator/ (const Vec3& v1, const float t)
 {
-	return vec3 (v1.x / t, v1.y / t, v1.z / t);
+	return Vec3 (v1.x / t, v1.y / t, v1.z / t);
 }
-constexpr vec3 operator* (const float t, const vec3& v1)
+constexpr Vec3 operator* (const float t, const Vec3& v1)
 {
-	return vec3 (v1.x * t, v1.y * t, v1.z * t);
+	return Vec3 (v1.x * t, v1.y * t, v1.z * t);
 }
 
-inline vec3& vec3::operator+= (const vec3& v)
+inline Vec3& Vec3::operator+= (const Vec3& v)
 {
 	x += v.x;
 	y += v.y;
@@ -71,7 +71,7 @@ inline vec3& vec3::operator+= (const vec3& v)
 	return *this;
 }
 
-inline vec3& vec3::operator-= (const vec3& v)
+inline Vec3& Vec3::operator-= (const Vec3& v)
 {
 	x -= v.x;
 	y -= v.y;
@@ -79,7 +79,7 @@ inline vec3& vec3::operator-= (const vec3& v)
 	return *this;
 }
 
-inline vec3& vec3::operator*= (const vec3& v)
+inline Vec3& Vec3::operator*= (const Vec3& v)
 {
 	x *= v.x;
 	y *= v.y;
@@ -87,7 +87,7 @@ inline vec3& vec3::operator*= (const vec3& v)
 	return *this;
 }
 
-inline vec3& vec3::operator*= (const float t)
+inline Vec3& Vec3::operator*= (const float t)
 {
 	x *= t;
 	y *= t;
@@ -95,7 +95,7 @@ inline vec3& vec3::operator*= (const float t)
 	return *this;
 }
 
-inline vec3& vec3::operator/= (const vec3& v)
+inline Vec3& Vec3::operator/= (const Vec3& v)
 {
 	x /= v.x;
 	y /= v.y;
@@ -103,7 +103,7 @@ inline vec3& vec3::operator/= (const vec3& v)
 	return *this;
 }
 
-inline vec3& vec3::operator/= (const float t)
+inline Vec3& Vec3::operator/= (const float t)
 {
 	float k = 1.0 / t;
 
@@ -113,14 +113,16 @@ inline vec3& vec3::operator/= (const float t)
 	return *this;
 }
 
-constexpr inline float dot (const vec3& v1, const vec3& v2)
+constexpr inline float dot (const Vec3& v1, const Vec3& v2)
 {
 	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
-constexpr inline vec3 cross (const vec3& v1, const vec3& v2)
+constexpr inline Vec3 cross (const Vec3& v1, const Vec3& v2)
 {
-	return vec3 (v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
+	return Vec3 (v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
 }
 
-constexpr inline vec3 unit_vector (const vec3 v) { return v / v.length (); }
+constexpr inline Vec3 unit_vector (const Vec3 v) { return v / v.length (); }
+
+constexpr static Vec3 ZERO = Vec3 (0.0, 0.0, 0.0);

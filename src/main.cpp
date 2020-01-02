@@ -4,13 +4,15 @@
 
 #include "vec3.h"
 
-#include "ray.h"
-
 #include "color.h"
+#include "ray.h"
+#include "shape.h"
+#include "sphere.h"
 
-constexpr float hit_sphere (const vec3& center, float radius, const ray& r)
+
+constexpr float hit_sphere (const Vec3& center, float radius, const Ray& r)
 {
-	vec3 oc = r.origin () - center;
+	Vec3 oc = r.origin () - center;
 	float a = dot (r.direction (), r.direction ());
 	float b = 2.0 * dot (oc, r.direction ());
 	float c = dot (oc, oc) - radius * radius;
@@ -25,28 +27,36 @@ constexpr float hit_sphere (const vec3& center, float radius, const ray& r)
 	}
 }
 
-constexpr vec3 color (const ray& r)
+constexpr Vec3 trace (const Ray& r, World const& world)
 {
-	float t = hit_sphere (vec3 (0, 0, -1), 0.5, r);
-	if (t > 0.0)
+	HitRecord rec;
+	if (world.hit (r, 0.0, std::numeric_limits<float>::max (), rec))
 	{
-		vec3 N = unit_vector (r.point_at_parameter (t) - vec3 (0, 0, -1));
-		return 0.5 * vec3 (N.x + 1, N.y + 1, N.z + 1);
+		// hit something, color with uv
+		return 0.5 * Vec3 (rec.normal.x + 1, rec.normal.y + 1, rec.normal.z + 1);
 	}
-	vec3 unit_direction = unit_vector (r.direction ());
-	t = 0.5 * (unit_direction.y + 1.0);
-	return (1.0f - t) * vec3 (1.0, 1.0, 1.0) + t * vec3 (0.5, 0.7, 1.0);
+	else
+	{
+		// hit nothing
+		Vec3 unit_direction = unit_vector (r.direction ());
+		float t = 0.5 * (unit_direction.y + 1.0);
+		return (1.0 - t) * Vec3 (1.0, 1.0, 1.0) + t * Vec3 (0.5, 0.7, 1.0);
+	}
 }
 
 template <std::size_t width, std::size_t height>
 using Framebuffer = std::array<Color, width * height>;
 
-template <std::size_t width, std::size_t height> constexpr auto trace ()
+template <std::size_t width, std::size_t height> constexpr auto raytrace ()
 {
-	vec3 lower_left_corner = vec3 (-2.0, -1.0, -1.0);
-	vec3 horizontal (4.0, 0.0, 0.0);
-	vec3 vertical (0.0, 2.0, 0.0);
-	vec3 origin (0.0, 0.0, 0.0);
+	Vec3 lower_left_corner = Vec3 (-2.0, -1.0, -1.0);
+	Vec3 horizontal (4.0, 0.0, 0.0);
+	Vec3 vertical (0.0, 2.0, 0.0);
+	Vec3 origin (0.0, 0.0, 0.0);
+
+	World world{};
+	world.add_shape (new Sphere (Vec3 (0, 0, -1), 0.5));
+	world.add_shape (new Sphere (Vec3 (0, -1.5, -1), 1));
 
 	Framebuffer<width, height> framebuffer{};
 	for (int i = 0; i < width; i++)
@@ -55,19 +65,20 @@ template <std::size_t width, std::size_t height> constexpr auto trace ()
 		{
 			float u = float (i) / float (width);
 			float v = float (j) / float (height);
-			ray r (origin, lower_left_corner + u * horizontal + v * vertical);
-			vec3 col = color (r);
+			Ray r (origin, lower_left_corner + u * horizontal + v * vertical);
+			Vec3 color = trace (r, world);
 
-			framebuffer.at (j * width + i) = vec_to_color (col);
+			framebuffer.at (j * width + i) = vec_to_color (color);
 		}
 	}
 	return framebuffer;
 }
 
-constexpr int nx = 500;
-constexpr int ny = 500;
-constexpr auto frame = trace<nx, ny> ();
 
+
+constexpr int nx = 100;
+constexpr int ny = 50;
+constexpr auto frame = raytrace<nx, ny> ();
 
 int main ()
 {
@@ -75,7 +86,10 @@ int main ()
 	ppm << "P3\n" << nx << " " << ny << "\n255\n";
 	for (int i = 0; i < frame.size (); i++)
 	{
-		ppm << static_cast<int> (frame.at (i).r) << " " << static_cast<int> (frame.at (i).g) << " "
-		    << static_cast<int> (frame.at (i).b) << "\n";
+		int r = static_cast<int> (frame.at (i).r * 255.99);
+		int g = static_cast<int> (frame.at (i).g * 255.99);
+		int b = static_cast<int> (frame.at (i).b * 255.99);
+
+		ppm << r << " " << g << " " << b << "\n";
 	}
 }
