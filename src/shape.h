@@ -1,10 +1,12 @@
 #pragma once
 
+#include "dynamic_array.h"
 #include "ray.h"
 #include "util.h"
 
 struct HitRecord
 {
+	bool hit;
 	float t;
 	Vec3 p;
 	Vec3 normal;
@@ -12,8 +14,8 @@ struct HitRecord
 
 struct Shape
 {
-	constexpr virtual bool hit (const Ray& r, float t_min, float t_max, HitRecord& rec) const = 0;
 	constexpr virtual ~Shape ();
+	constexpr virtual HitRecord hit (const Ray& r, float t_min, float t_max) const = 0;
 };
 
 constexpr Shape::~Shape () {}
@@ -31,23 +33,25 @@ struct World
 
 	constexpr void add_shape (Shape* shape) { shapes.push_back (shape); }
 
-	constexpr virtual bool hit (const Ray& r, float t_min, float t_max, HitRecord& rec) const
+	constexpr virtual HitRecord hit (const Ray& r, float t_min, float t_max) const
 	{
-		HitRecord temp_rec;
-		bool hit_anything = false;
-		double closest_so_far = t_max;
+		HitRecord return_rec{};
+		return_rec.hit = false;
+		float closest_so_far = t_max;
 		for (int i = 0; i < shapes.size (); i++)
 		{
-			if (shapes.at (i)->hit (r, t_min, closest_so_far, temp_rec))
+			HitRecord temp_rec = shapes.at (i)->hit (r, t_min, closest_so_far);
+			if (temp_rec.hit && temp_rec.t < closest_so_far)
 			{
-				hit_anything = true;
 				closest_so_far = temp_rec.t;
-				rec = temp_rec;
+				return_rec = temp_rec;
 			}
 		}
-		return hit_anything;
+		return return_rec;
 	}
 
+	PRNG random;
+
 	private:
-	DynArr<Shape*> shapes;
+	DynamicArray<Shape*> shapes;
 };

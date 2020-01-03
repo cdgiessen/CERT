@@ -4,36 +4,23 @@
 
 #include "vec3.h"
 
+#include "camera.h"
 #include "color.h"
 #include "ray.h"
 #include "shape.h"
 #include "sphere.h"
 
-
-constexpr float hit_sphere (const Vec3& center, float radius, const Ray& r)
+constexpr Vec3 trace (const Ray& r, World& world)
 {
-	Vec3 oc = r.origin () - center;
-	float a = dot (r.direction (), r.direction ());
-	float b = 2.0 * dot (oc, r.direction ());
-	float c = dot (oc, oc) - radius * radius;
-	float discriminant = b * b - 4 * a * c;
-	if (discriminant < 0)
+	HitRecord rec = world.hit (r, 0.0, std::numeric_limits<float>::max ());
+	if (rec.hit)
 	{
-		return -1.0;
-	}
-	else
-	{
-		return (-b - sqrt (discriminant)) / (2.0 * a);
-	}
-}
+		// Lambertian
+		// Vec3 target = rec.p + rec.normal + random_in_unit_sphere (world.random);
+		// return 0.5 * trace (Ray (rec.p, target - rec.p), world);
 
-constexpr Vec3 trace (const Ray& r, World const& world)
-{
-	HitRecord rec;
-	if (world.hit (r, 0.0, std::numeric_limits<float>::max (), rec))
-	{
 		// hit something, color with uv
-		return 0.5 * Vec3 (rec.normal.x + 1, rec.normal.y + 1, rec.normal.z + 1);
+		return 0.5 * (rec.normal + 1.0f);
 	}
 	else
 	{
@@ -47,26 +34,29 @@ constexpr Vec3 trace (const Ray& r, World const& world)
 template <std::size_t width, std::size_t height>
 using Framebuffer = std::array<Color, width * height>;
 
-template <std::size_t width, std::size_t height> constexpr auto raytrace ()
+template <std::size_t width, std::size_t height, std::size_t sample_count>
+constexpr auto raytrace (bool run_time)
 {
-	Vec3 lower_left_corner = Vec3 (-2.0, -1.0, -1.0);
-	Vec3 horizontal (4.0, 0.0, 0.0);
-	Vec3 vertical (0.0, 2.0, 0.0);
-	Vec3 origin (0.0, 0.0, 0.0);
-
 	World world{};
-	world.add_shape (new Sphere (Vec3 (0, 0, -1), 0.5));
 	world.add_shape (new Sphere (Vec3 (0, -1.5, -1), 1));
+	world.add_shape (new Sphere (Vec3 (0, 0, -1), 0.5));
+
+	Camera cam{};
 
 	Framebuffer<width, height> framebuffer{};
 	for (int i = 0; i < width; i++)
 	{
 		for (int j = 0; j < height; j++)
 		{
-			float u = float (i) / float (width);
-			float v = float (j) / float (height);
-			Ray r (origin, lower_left_corner + u * horizontal + v * vertical);
-			Vec3 color = trace (r, world);
+			Vec3 color (0, 0, 0);
+			for (int s = 0; s < sample_count; s++)
+			{
+				float u = float (i + world.random.get_float ()) / float (width);
+				float v = float (j + world.random.get_float ()) / float (height);
+				Ray r = cam.get_ray (u, v);
+				color += trace (r, world);
+			}
+			color /= float (sample_count);
 
 			framebuffer.at (j * width + i) = vec_to_color (color);
 		}
@@ -76,19 +66,26 @@ template <std::size_t width, std::size_t height> constexpr auto raytrace ()
 
 
 
-constexpr int nx = 100;
-constexpr int ny = 50;
-constexpr auto frame = raytrace<nx, ny> ();
+constexpr int width = 100;
+constexpr int height = 50;
+constexpr int samples = 1;
+constexpr auto frame = raytrace<width, height, samples> (false);
 
-int main ()
+int main (int argc, char** argv)
 {
+	if (argc == 2)
+	{
+		bool runtime = strcmp (argv[1], "runtime");
+		auto other_frame = raytrace<width, height, samples> (false);
+	}
+
 	std::ofstream ppm ("output.ppm");
-	ppm << "P3\n" << nx << " " << ny << "\n255\n";
+	ppm << "P3\n" << width << " " << height << "\n255\n";
 	for (int i = 0; i < frame.size (); i++)
 	{
-		int r = static_cast<int> (frame.at (i).r * 255.99);
-		int g = static_cast<int> (frame.at (i).g * 255.99);
-		int b = static_cast<int> (frame.at (i).b * 255.99);
+		int r = static_cast<int> (frame.at (i).r);
+		int g = static_cast<int> (frame.at (i).g);
+		int b = static_cast<int> (frame.at (i).b);
 
 		ppm << r << " " << g << " " << b << "\n";
 	}

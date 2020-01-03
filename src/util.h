@@ -10,12 +10,33 @@ template <class T> constexpr T const& max (const T& a, const T& b) { return (a <
 
 template <typename T> constexpr T abs (T num) { return num >= 0 ? num : -num; }
 
+struct PRNG
+{
+	constexpr PRNG (int seed = 123456789) : seed (seed) {}
+
+	constexpr int get_int ()
+	{
+		seed = (1103515245 * seed + 12345) % std::numeric_limits<int>::max ();
+		return static_cast<int> (seed);
+	}
+	constexpr float get_float ()
+	{
+		seed = ((1103515245 * seed + 12345) % std::numeric_limits<int>::max ());
+		return static_cast<float> (seed) / std::numeric_limits<float>::max ();
+	}
+
+	private:
+	long seed;
+};
+
 constexpr bool nearly_equal (const float a,
     const float b,
     float epsilon = 128 * std::numeric_limits<float>::epsilon (),
     float relth = std::numeric_limits<float>::min ())
 // those defaults are arbitrary and could be removed
 {
+	// return (a < b + 0.001 && a > b - 0.001);
+
 	// assert (std::numeric_limits<float>::epsilon () <= epsilon);
 	// assert (epsilon < 1.f);
 
@@ -153,86 +174,3 @@ inline float fast_sqrt (float number)
 
 	return y;
 }
-
-template <typename T> class DynArr
-{
-	T* m_data = nullptr;
-	std::size_t m_size = 0;
-	std::size_t m_allocated = 0;
-
-	public:
-	constexpr DynArr ()
-	{
-		m_allocated = 10;
-		m_data = new T[m_allocated];
-		m_size = 0;
-	}
-	constexpr DynArr (std::size_t size)
-	{
-		m_data = new T[size];
-		m_size = size;
-		m_allocated = size;
-	}
-	constexpr ~DynArr ()
-	{
-		if (m_data != nullptr) delete[] m_data;
-	}
-	DynArr (DynArr const& obj) = delete;
-	DynArr& operator= (DynArr const& obj) = delete;
-
-	DynArr (DynArr&& obj) : m_data (obj.m_data), m_size (obj.m_size), m_allocated (obj.m_allocated)
-	{
-		obj.m_data = nullptr;
-	}
-	DynArr& operator= (DynArr&& obj)
-	{
-		m_data = obj.m_data;
-		m_size = obj.m_size;
-		m_allocated = obj.m_allocated;
-		obj.m_data = nullptr;
-		return *this;
-	}
-
-	constexpr void resize (std::size_t new_size)
-	{
-		if (new_size > m_allocated)
-		{
-			T* temp = new float[m_allocated * 2];
-			for (int i = 0; i < m_size; i++)
-			{
-				temp[i] = m_data[i];
-			}
-			delete[] m_data;
-			m_data = temp;
-			m_size = new_size;
-			m_allocated = m_allocated * 2;
-		}
-		else
-		{
-			m_size = new_size;
-		}
-	}
-
-	constexpr T& set (std::size_t index, T value)
-	{
-		if (index < m_size)
-		{
-			m_data[index] = value;
-			return m_data[index];
-		}
-	}
-
-	constexpr void push_back (T value)
-	{
-		m_data[m_size] = value;
-		m_size++;
-	}
-
-	constexpr void erase (std::size_t index) {}
-
-	constexpr void reset () { m_size = 0; }
-
-	constexpr T const& at (std::size_t index) const { return m_data[index]; }
-	constexpr std::size_t size () const { return m_size; }
-	constexpr T* data () const { return m_data; }
-};

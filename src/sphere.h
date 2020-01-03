@@ -7,7 +7,7 @@ class Sphere : public Shape
 	public:
 	constexpr Sphere () {}
 	constexpr Sphere (Vec3 cen, float r) : center (cen), radius (r){};
-	constexpr virtual bool hit (const Ray& r, float t_min, float t_max, HitRecord& rec) const
+	constexpr virtual HitRecord hit (const Ray& r, float t_min, float t_max) const
 	{
 		Vec3 oc = r.origin () - center;
 		float a = dot (r.direction (), r.direction ());
@@ -16,24 +16,28 @@ class Sphere : public Shape
 		float discriminant = b * b - a * c;
 		if (discriminant > 0)
 		{
-			float temp = (-b - sqrt (discriminant)) / a;
-			if (temp < t_max && temp > t_min)
+			float negative = (-b - sqrt (discriminant)) / a;
+			if (negative < t_max && negative > t_min)
 			{
-				rec.t = temp;
-				rec.p = r.point_at_parameter (rec.t);
-				rec.normal = (rec.p - center) / radius;
-				return true;
+				HitRecord out{};
+				out.hit = true;
+				out.t = negative;
+				out.p = r.point_at_parameter (out.t);
+				out.normal = ((out.p - center) / radius);
+				return out;
 			}
-			temp = (-b + sqrt (discriminant)) / a;
-			if (temp < t_max && temp > t_min)
+			float positive = (-b + sqrt (discriminant)) / a;
+			if (positive < t_max && positive > t_min)
 			{
-				rec.t = temp;
-				rec.p = r.point_at_parameter (rec.t);
-				rec.normal = (rec.p - center) / radius;
-				return true;
+				HitRecord out{};
+				out.hit = true;
+				out.t = positive;
+				out.p = r.point_at_parameter (out.t);
+				out.normal = ((out.p - center) / radius);
+				return out;
 			}
 		}
-		return false;
+		return HitRecord{ false, 0, { 0, 0, 0 }, { 0, 0, 0 } };
 	}
 	Vec3 center = ZERO;
 	float radius = 1.0;

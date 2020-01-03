@@ -4,7 +4,12 @@
 #include "vec3.h"
 struct Color
 {
-	float r = 0, g = 0, b = 0;
+	uint8_t r = 0, g = 0, b = 0;
 };
 
-constexpr Color vec_to_color (Vec3 const& v) { return { v.x, v.y, v.z }; }
+constexpr Color vec_to_color (Vec3 const& v)
+{
+	return { static_cast<uint8_t> (v.x * 255.99),
+		static_cast<uint8_t> (v.y * 255.99),
+		static_cast<uint8_t> (v.z * 255.99) };
+}
