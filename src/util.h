@@ -22,7 +22,7 @@ struct PRNG
 	constexpr float get_float ()
 	{
 		seed = ((1103515245 * seed + 12345) % std::numeric_limits<int>::max ());
-		return static_cast<float> (seed) / std::numeric_limits<float>::max ();
+		return static_cast<float> (seed) / static_cast<float> (std::numeric_limits<int>::max ());
 	}
 
 	private:
@@ -174,3 +174,19 @@ inline float fast_sqrt (float number)
 
 	return y;
 }
+
+constexpr bool feq (float x, float y)
+{
+	return abs (x - y) <= std::numeric_limits<float>::epsilon ();
+}
+
+constexpr float trig_series (float x, float sum, float n, int i, int s, float t)
+{
+	return feq (sum, sum + t * s / n) ?
+	           sum :
+	           trig_series (x, sum + t * s / n, n * i * (i + 1), i + 2, -s, t * x * x);
+}
+
+constexpr float sin (float x) { return trig_series (x, x, 6.0f, 4, -1, x * x * x); }
+constexpr float cos (float x) { return trig_series (x, 1.0f, 2.0f, 3, -1, x * x); }
+constexpr float tan (float x) { return sin (x) / cos (x); }

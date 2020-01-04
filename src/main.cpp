@@ -38,10 +38,12 @@ template <std::size_t width, std::size_t height, std::size_t sample_count>
 constexpr auto raytrace (bool run_time)
 {
 	World world{};
-	world.add_shape (new Sphere (Vec3 (0, -1.5, -1), 1));
-	world.add_shape (new Sphere (Vec3 (0, 0, -1), 0.5));
+	world.add_shape (new Sphere (Vec3 (0, -1.5, -3), 2));
+	world.add_shape (new Sphere (Vec3 (0, 1, -1), 0.5));
 
-	Camera cam{};
+	Camera cam{
+		Vec3 (0, 0, 0), Vec3 (0, 0, -1), Vec3 (0, 1, 0), 90, static_cast<float> (width) / static_cast<float> (height)
+	};
 
 	Framebuffer<width, height> framebuffer{};
 	for (int i = 0; i < width; i++)
@@ -51,12 +53,12 @@ constexpr auto raytrace (bool run_time)
 			Vec3 color (0, 0, 0);
 			for (int s = 0; s < sample_count; s++)
 			{
-				float u = float (i + world.random.get_float ()) / float (width);
-				float v = float (j + world.random.get_float ()) / float (height);
+				float u = float (i + /*world.random.get_float ()*/) / float (width);
+				float v = float (j + /*world.random.get_float ()*/) / float (height);
 				Ray r = cam.get_ray (u, v);
 				color += trace (r, world);
 			}
-			color /= float (sample_count);
+			color /= static_cast<float> (sample_count);
 
 			framebuffer.at (j * width + i) = vec_to_color (color);
 		}
@@ -67,7 +69,7 @@ constexpr auto raytrace (bool run_time)
 
 
 constexpr int width = 100;
-constexpr int height = 50;
+constexpr int height = 100;
 constexpr int samples = 1;
 constexpr auto frame = raytrace<width, height, samples> (false);
 

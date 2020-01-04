@@ -23,7 +23,7 @@ class Sphere : public Shape
 				out.hit = true;
 				out.t = negative;
 				out.p = r.point_at_parameter (out.t);
-				out.normal = ((out.p - center) / radius);
+				out.normal = unit_vector ((out.p - center) / radius);
 				return out;
 			}
 			float positive = (-b + sqrt (discriminant)) / a;
@@ -33,7 +33,7 @@ class Sphere : public Shape
 				out.hit = true;
 				out.t = positive;
 				out.p = r.point_at_parameter (out.t);
-				out.normal = ((out.p - center) / radius);
+				out.normal = unit_vector ((out.p - center) / radius);
 				return out;
 			}
 		}
