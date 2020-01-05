@@ -6,7 +6,10 @@ class Sphere : public Shape
 {
 	public:
 	constexpr Sphere () {}
-	constexpr Sphere (Vec3 cen, float r) : center (cen), radius (r){};
+	constexpr Sphere (Vec3 cen, float r, Material* mat) : Shape (mat), center (cen), radius (r)
+	{
+		this->mat = mat;
+	};
 	constexpr virtual HitRecord hit (const Ray& r, float t_min, float t_max) const
 	{
 		Vec3 oc = r.origin () - center;
@@ -24,6 +27,7 @@ class Sphere : public Shape
 				out.t = negative;
 				out.p = r.point_at_parameter (out.t);
 				out.normal = unit_vector ((out.p - center) / radius);
+				out.mat = mat;
 				return out;
 			}
 			float positive = (-b + sqrt (discriminant)) / a;
@@ -34,11 +38,12 @@ class Sphere : public Shape
 				out.t = positive;
 				out.p = r.point_at_parameter (out.t);
 				out.normal = unit_vector ((out.p - center) / radius);
+				out.mat = mat;
 				return out;
 			}
 		}
 		return HitRecord{ false, 0, { 0, 0, 0 }, { 0, 0, 0 } };
 	}
-	Vec3 center = ZERO;
+	Vec3 center = VEC3_ZERO;
 	float radius = 1.0;
 };

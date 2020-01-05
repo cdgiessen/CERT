@@ -10,7 +10,7 @@ template <typename T> class DynamicArray
 	public:
 	constexpr DynamicArray ()
 	{
-		m_allocated = 10;
+		m_allocated = 100;
 		m_data = new T[m_allocated];
 		m_size = 0;
 	}
@@ -45,7 +45,7 @@ template <typename T> class DynamicArray
 	{
 		if (new_size > m_allocated)
 		{
-			T* temp = new float[m_allocated * 2];
+			T* temp = new T[m_allocated * 2];
 			for (int i = 0; i < m_size; i++)
 			{
 				temp[i] = m_data[i];
@@ -61,6 +61,21 @@ template <typename T> class DynamicArray
 		}
 	}
 
+	constexpr void reserve (std::size_t new_reserve)
+	{
+		if (new_reserve > m_allocated)
+		{
+			T* temp = new T[new_reserve];
+			for (int i = 0; i < m_size; i++)
+			{
+				temp[i] = m_data[i];
+			}
+			delete[] m_data;
+			m_data = temp;
+			m_allocated = new_reserve;
+		}
+	}
+
 	constexpr T& set (std::size_t index, T value)
 	{
 		if (index < m_size)
@@ -72,7 +87,12 @@ template <typename T> class DynamicArray
 
 	constexpr void push_back (T value)
 	{
-		m_data[m_size] = value;
+		int new_val_index = m_size;
+		if (m_size >= m_allocated)
+		{
+			reserve (2 * m_allocated);
+		}
+		m_data[new_val_index] = value;
 		m_size++;
 	}
 

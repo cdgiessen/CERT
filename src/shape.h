@@ -1,24 +1,20 @@
 #pragma once
 
 #include "dynamic_array.h"
+#include "material.h"
 #include "ray.h"
 #include "util.h"
 
-struct HitRecord
-{
-	bool hit;
-	float t;
-	Vec3 p;
-	Vec3 normal;
-};
-
 struct Shape
 {
+	constexpr Shape () {}
+	constexpr Shape (Material* mat) : mat (mat) {}
 	constexpr virtual ~Shape ();
 	constexpr virtual HitRecord hit (const Ray& r, float t_min, float t_max) const = 0;
+	Material* mat = nullptr;
 };
 
-constexpr Shape::~Shape () {}
+constexpr Shape::~Shape () { delete mat; }
 
 struct World
 {

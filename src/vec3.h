@@ -27,7 +27,7 @@ struct Vec3
 	constexpr inline float squared_length () const { return x * x + y * y + z * z; }
 	constexpr inline void make_unit_vector ()
 	{
-		float k = 1.0 / length ();
+		float k = 1.0 / sqrt (x * x + y * y + z * z);
 		x *= k;
 		y *= k;
 		z *= k;
@@ -124,6 +124,14 @@ constexpr inline Vec3 cross (const Vec3& v1, const Vec3& v2)
 	return Vec3 (v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
 }
 
+constexpr Vec3 reflect (const Vec3& v, const Vec3& n) { return v - 2 * dot (v, n) * n; }
+
 constexpr inline Vec3 unit_vector (const Vec3& v) { return v / v.length (); }
 
-constexpr static Vec3 ZERO = Vec3 (0.0f, 0.0f, 0.0f);
+constexpr static Vec3 VEC3_ZERO = Vec3 (0.0f, 0.0f, 0.0f);
+constexpr static Vec3 VEC3_RIGHT = Vec3 (1.0f, 0.0f, 0.0f);
+constexpr static Vec3 VEC3_LEFT = Vec3 (-1.0f, 0.0f, 0.0f);
+constexpr static Vec3 VEC3_UP = Vec3 (0.0f, 1.0f, 0.0f);
+constexpr static Vec3 VEC3_DOWN = Vec3 (0.0f, -1.0f, 0.0f);
+constexpr static Vec3 VEC3_FORWARD = Vec3 (0.0f, 0.0f, 1.0f);
+constexpr static Vec3 VEC3_BACKWARD = Vec3 (0.0f, 0.0f, -1.0f);

@@ -10,6 +10,29 @@ template <class T> constexpr T const& max (const T& a, const T& b) { return (a <
 
 template <typename T> constexpr T abs (T num) { return num >= 0 ? num : -num; }
 
+
+template <typename T> constexpr T pow (T x, int n)
+{
+	if (n == 0) return 1.0;
+	if (n == 1) return x;
+
+	if (n > 1)
+	{
+		if (n & 1)
+		{
+			return x * pow (x, n - 1);
+		}
+		else
+		{
+			return pow (x, n / 2);
+		}
+	}
+	else
+	{
+		return 1.0 / pow (x, -n);
+	}
+}
+
 struct PRNG
 {
 	constexpr PRNG (int seed = 123456789) : seed (seed) {}
@@ -75,7 +98,7 @@ constexpr float sqrt (float res)
 
 // Based on code from
 // https://graphics.stanford.edu/~seander/bithacks.html
-constexpr int count_leading_zeroes (uint64_t v)
+constexpr int count_leading_VEC3_VEC3_ZEROes (uint64_t v)
 {                // clang-format off
   constexpr char bit_position[64] = {  
      0,  1,  2,  7,  3, 13,  8, 19,  4, 25, 14, 28,  9, 34, 20, 40, 
@@ -117,7 +140,7 @@ constexpr int32_t bits (float f)
 	}
 
 	uint64_t a = (uint64_t) (abs_f * 0x1p-64f);
-	int lz = count_leading_zeroes (a);
+	int lz = count_leading_VEC3_VEC3_ZEROes (a);
 	exponent -= lz;
 
 	if (exponent <= 0)

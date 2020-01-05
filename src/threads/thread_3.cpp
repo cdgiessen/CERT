@@ -1,6 +1,6 @@
-#include "thread_1.h"
+#include "threads.h"
 
-constexpr Image<Color, width, height / 4> frame =
-    raytrace<width, height, width, height / 4, 0, 3 * height / 4, samples> ();
+constexpr Image<Color, width, height / 12> frame =
+    raytrace<width, height, width, height / 12, 0, 3 * height / 12, samples> ();
 
-Image<Color, width, height / 4> get_frame_3 () { return frame; }
+Image<Color, width, height / 12> get_frame_3 () { return frame; }

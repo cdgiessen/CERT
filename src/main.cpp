@@ -3,11 +3,7 @@
 
 #include "raytracer.h"
 
-#include "threads/thread_0.h"
-#include "threads/thread_1.h"
-#include "threads/thread_2.h"
-#include "threads/thread_3.h"
-
+#include "threads/threads.h"
 
 template <typename T> void print_image (std::ofstream& ppm, T const& frame)
 {
@@ -29,4 +25,12 @@ int main (int argc, char** argv)
 	print_image (ppm, get_frame_1 ());
 	print_image (ppm, get_frame_2 ());
 	print_image (ppm, get_frame_3 ());
+	print_image (ppm, get_frame_4 ());
+	print_image (ppm, get_frame_5 ());
+	print_image (ppm, get_frame_6 ());
+	print_image (ppm, get_frame_7 ());
+	print_image (ppm, get_frame_8 ());
+	print_image (ppm, get_frame_9 ());
+	print_image (ppm, get_frame_10 ());
+	print_image (ppm, get_frame_11 ());
 }
