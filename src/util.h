@@ -35,16 +35,20 @@ constexpr bool nearly_equal (const float a,
     float relth = std::numeric_limits<float>::min ())
 // those defaults are arbitrary and could be removed
 {
-	// return (a < b + 0.001 && a > b - 0.001);
-
 	// assert (std::numeric_limits<float>::epsilon () <= epsilon);
 	// assert (epsilon < 1.f);
 
 	if (a == b) return true;
 
-	const auto diff = abs (a - b);
-	const auto norm = min ((abs (a) + abs (b)), std::numeric_limits<float>::max ());
-	return diff < max (relth, epsilon * norm);
+	const float minus_ab = a - b;
+	const float diff = minus_ab >= 0 ? minus_ab : -minus_ab;
+	const float abs_a = a >= 0 ? a : -a;
+	const float abs_b = b >= 0 ? b : -b;
+	const float norm = (abs_a + abs_b) < std::numeric_limits<float>::max () ?
+	                       (abs_a + abs_b) :
+	                       std::numeric_limits<float>::max ();
+	const float max_relth = relth > epsilon * norm ? relth : epsilon * norm;
+	return diff < max_relth;
 }
 
 constexpr float sqrt (float res)
@@ -187,6 +191,46 @@ constexpr float trig_series (float x, float sum, float n, int i, int s, float t)
 	           trig_series (x, sum + t * s / n, n * i * (i + 1), i + 2, -s, t * x * x);
 }
 
-constexpr float sin (float x) { return trig_series (x, x, 6.0f, 4, -1, x * x * x); }
-constexpr float cos (float x) { return trig_series (x, 1.0f, 2.0f, 3, -1, x * x); }
+constexpr float sin (float x)
+{
+	float sum = x;
+	float n = 6.0f;
+	int i = 4;
+	int s = 1;
+	float t = x * x * x;
+
+	bool done = feq (sum, sum + t * s / n);
+	while (!done)
+	{
+		sum += t * s / n;
+		n *= i * (i + 1);
+		i += 2;
+		s = -s;
+		t *= x * x;
+		done = feq (sum, sum + t * s / n);
+	}
+	return sum;
+	// return trig_series (x, x, 6.0f, 4, -1, x * x * x);
+}
+constexpr float cos (float x)
+{
+	float sum = 1.0f;
+	float n = 2.0f;
+	int i = 3;
+	int s = -1;
+	float t = x * x;
+
+	bool done = feq (sum, sum + t * s / n);
+	while (!done)
+	{
+		sum += t * s / n;
+		n *= i * (i + 1);
+		i += 2;
+		s = -s;
+		t *= x * x;
+		done = feq (sum, sum + t * s / n);
+	}
+	return sum;
+	// return trig_series (x, 1.0f, 2.0f, 3, -1, x * x);
+}
 constexpr float tan (float x) { return sin (x) / cos (x); }
