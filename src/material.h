@@ -49,10 +49,10 @@ struct Metal : public Material
 	constexpr virtual bool scatter (
 	    const Ray& r_in, const HitRecord& rec, Vec3& attenuation, Ray& scattered, PRNG& random) const
 	{
-		Vec3 reflected = reflect (unit_vector (r_in.direction ()), rec.normal);
+		Vec3 reflected = reflect (unit_vector (r_in.direction), rec.normal);
 		scattered = Ray (rec.p, reflected);
 		attenuation = albedo;
-		return (dot (scattered.direction (), rec.normal) > 0);
+		return (dot (scattered.direction, rec.normal) > 0);
 	}
 	float fuzz;
 };
@@ -86,7 +86,7 @@ struct Dielectric : public Material
 	    const Ray& r_in, const HitRecord& rec, Vec3& attenuation, Ray& scattered, PRNG& random) const
 	{
 		Vec3 outward_normal;
-		Vec3 reflected = reflect (r_in.direction (), rec.normal);
+		Vec3 reflected = reflect (r_in.direction, rec.normal);
 		float ni_over_nt = 0;
 		attenuation = Vec3 (1.0, 1.0, 1.0);
 		Vec3 refracted;
@@ -94,20 +94,20 @@ struct Dielectric : public Material
 		float reflect_prob = 0;
 		float cosine = 0;
 
-		if (dot (r_in.direction (), rec.normal) > 0)
+		if (dot (r_in.direction, rec.normal) > 0)
 		{
 			outward_normal = -rec.normal;
 			ni_over_nt = ref_idx;
-			cosine = ref_idx * dot (r_in.direction (), rec.normal) / r_in.direction ().length ();
+			cosine = ref_idx * dot (r_in.direction, rec.normal) / r_in.direction.length ();
 		}
 		else
 		{
 			outward_normal = rec.normal;
 			ni_over_nt = 1.0 / ref_idx;
-			cosine = -dot (r_in.direction (), rec.normal) / r_in.direction ().length ();
+			cosine = -dot (r_in.direction, rec.normal) / r_in.direction.length ();
 		}
 
-		if (refract (r_in.direction (), outward_normal, ni_over_nt, refracted))
+		if (refract (r_in.direction, outward_normal, ni_over_nt, refracted))
 		{
 			reflect_prob = schlick (cosine, ref_idx);
 		}

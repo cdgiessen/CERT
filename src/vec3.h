@@ -129,6 +129,7 @@ constexpr Vec3 reflect (const Vec3& v, const Vec3& n) { return v - 2 * dot (v, n
 constexpr inline Vec3 unit_vector (const Vec3& v) { return v / v.length (); }
 
 constexpr static Vec3 VEC3_ZERO = Vec3 (0.0f, 0.0f, 0.0f);
+constexpr static Vec3 VEC3_ONE = Vec3 (1.0f, 1.0f, 1.0f);
 constexpr static Vec3 VEC3_RIGHT = Vec3 (1.0f, 0.0f, 0.0f);
 constexpr static Vec3 VEC3_LEFT = Vec3 (-1.0f, 0.0f, 0.0f);
 constexpr static Vec3 VEC3_UP = Vec3 (0.0f, 1.0f, 0.0f);

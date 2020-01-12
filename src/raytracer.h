@@ -20,7 +20,9 @@ constexpr int max_bounces = 1;
 
 constexpr void setup_scene (World& world)
 {
-	world.add_shape (new Sphere (Vec3 (0, -1000, 0), 1000, new Lambertian (Vec3 (0.5, 0.5, 0.5))));
+	auto grey = world.add_material (new Lambertian (Vec3 (0.5, 0.5, 0.5)));
+	world.add_shape (new Sphere (Vec3 (0, -1000, 0), 1000, grey));
+
 	int x_range = 1;
 	int z_range = 1;
 	for (int a = -x_range; a < x_range; a++)
@@ -33,20 +35,20 @@ constexpr void setup_scene (World& world)
 			{
 				if (choose_mat < 0.8)
 				{ // diffuse
-					world.add_shape (new Sphere (center,
-					    0.2,
+					auto lambert = world.add_material (
 					    new Lambertian (Vec3 (world.random.get_float () * world.random.get_float (),
 					        world.random.get_float () * world.random.get_float (),
-					        world.random.get_float () * world.random.get_float ()))));
+					        world.random.get_float () * world.random.get_float ())));
+					world.add_shape (new Sphere (center, 0.2, lambert));
 				}
 				else if (choose_mat < 0.95)
 				{ // metal
-					world.add_shape (new Sphere (center,
-					    0.2,
-					    new Metal (Vec3 (0.5 * (1 + world.random.get_float ()),
-					                   0.5 * (1 + world.random.get_float ()),
-					                   0.5 * (1 + world.random.get_float ())),
-					        0.5 * world.random.get_float ())));
+					auto metal =
+					    world.add_material (new Metal (Vec3 (0.5 * (1 + world.random.get_float ()),
+					                                       0.5 * (1 + world.random.get_float ()),
+					                                       0.5 * (1 + world.random.get_float ())),
+					        0.5 * world.random.get_float ()));
+					world.add_shape (new Sphere (center, 0.2, metal));
 				}
 				// else
 				//{ // glass
@@ -55,10 +57,15 @@ constexpr void setup_scene (World& world)
 			}
 		}
 	}
+	auto col1 = world.add_material (new Lambertian (Vec3 (0.4, 1.0, 0.6)));
+	auto col2 = world.add_material (new Lambertian (Vec3 (0.4, 0.2, 0.1)));
+	auto col3 = world.add_material (new Metal (Vec3 (0.7, 0.6, 0.5), 0.0));
 
-	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, new Lambertian (Vec3 (0.4, 1.0, 0.6))));
-	world.add_shape (new Sphere (Vec3 (-4, 1, 0), 1.0, new Lambertian (Vec3 (0.4, 0.2, 0.1))));
-	world.add_shape (new Sphere (Vec3 (4, 1, 0), 1.0, new Metal (Vec3 (0.7, 0.6, 0.5), 0.0)));
+	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, col1));
+	world.add_shape (new Sphere (Vec3 (-4, 1, 0), 1.0, col2));
+	world.add_shape (new Sphere (Vec3 (4, 1, 0), 1.0, col3));
+
+	world.add_light (new DirLight (VEC3_ONE, Vec3 (1, -2, -2)));
 }
 
 constexpr Vec3 trace (const Ray& r, World& world, int depth)
@@ -66,6 +73,11 @@ constexpr Vec3 trace (const Ray& r, World& world, int depth)
 	HitRecord rec = world.hit (r, 0.001, std::numeric_limits<float>::max ());
 	if (rec.hit)
 	{
+		// for (int i = 0; i < light_count; i++)
+		// {
+		// 	auto light_ray = Ray (rec.p, );
+		// }
+
 		Ray scattered;
 		Vec3 attenuation;
 		if (depth < max_bounces && rec.mat->scatter (r, rec, attenuation, scattered, world.random))
@@ -79,8 +91,9 @@ constexpr Vec3 trace (const Ray& r, World& world, int depth)
 	}
 	else
 	{
-		// hit nothing
-		Vec3 unit_direction = unit_vector (r.direction ());
+
+		// hit nothing - ie background
+		Vec3 unit_direction = unit_vector (r.direction);
 		float t = 0.5 * (unit_direction.y + 1.0);
 		return (1.0 - t) * Vec3 (1.0, 1.0, 1.0) + t * Vec3 (0.5, 0.7, 1.0);
 	}

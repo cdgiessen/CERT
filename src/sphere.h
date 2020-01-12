@@ -12,9 +12,9 @@ class Sphere : public Shape
 	};
 	constexpr virtual HitRecord hit (const Ray& r, float t_min, float t_max) const
 	{
-		Vec3 oc = r.origin () - center;
-		float a = dot (r.direction (), r.direction ());
-		float b = dot (oc, r.direction ());
+		Vec3 oc = r.origin - center;
+		float a = dot (r.direction, r.direction);
+		float b = dot (oc, r.direction);
 		float c = dot (oc, oc) - radius * radius;
 		float discriminant = b * b - a * c;
 		if (discriminant > 0)

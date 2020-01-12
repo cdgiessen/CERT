@@ -1,6 +1,7 @@
 #pragma once
 
 #include "dynamic_array.h"
+#include "light.h"
 #include "material.h"
 #include "ray.h"
 #include "util.h"
@@ -14,7 +15,7 @@ struct Shape
 	Material* mat = nullptr;
 };
 
-constexpr Shape::~Shape () { delete mat; }
+constexpr Shape::~Shape () {}
 
 struct World
 {
@@ -25,9 +26,32 @@ struct World
 		{
 			delete shapes.at (i);
 		}
+		for (int i = 0; i < materials.size (); i++)
+		{
+			delete materials.at (i);
+		}
+		for (int i = 0; i < lights.size (); i++)
+		{
+			delete lights.at (i);
+		}
 	}
 
-	constexpr void add_shape (Shape* shape) { shapes.push_back (shape); }
+	constexpr Shape* add_shape (Shape* shape)
+	{
+		shapes.push_back (shape);
+		return shape;
+	}
+	constexpr Material* add_material (Material* mat)
+	{
+		materials.push_back (mat);
+		return mat;
+	}
+	constexpr Light* add_light (Light* light)
+	{
+		lights.push_back (light);
+		return light;
+	}
+
 
 	constexpr virtual HitRecord hit (const Ray& r, float t_min, float t_max) const
 	{
@@ -50,4 +74,6 @@ struct World
 
 	private:
 	DynamicArray<Shape*> shapes;
+	DynamicArray<Material*> materials;
+	DynamicArray<Light*> lights;
 };

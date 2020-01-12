@@ -7,17 +7,14 @@ class Ray
 {
 	public:
 	constexpr Ray () {}
-	constexpr Ray (const Vec3& a, const Vec3& b)
+	constexpr Ray (const Vec3& origin, const Vec3& direction)
+	: origin (origin), direction (direction)
 	{
-		A = a;
-		B = b;
 	}
-	constexpr Vec3 origin () const { return A; }
-	constexpr Vec3 direction () const { return B; }
-	constexpr Vec3 point_at_parameter (float t) const { return A + B * t; }
+	constexpr Vec3 point_at_parameter (float t) const { return origin + direction * t; }
 
-	Vec3 A;
-	Vec3 B;
+	Vec3 origin;
+	Vec3 direction;
 };
 
 constexpr Vec3 random_in_unit_sphere (PRNG& random)
