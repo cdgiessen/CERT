@@ -11,16 +11,16 @@
 #include "shape.h"
 #include "sphere.h"
 
-constexpr int width = 150;
-constexpr int height = 150;
-constexpr int samples = 10;
-constexpr int max_bounces = 10;
+constexpr int thread_count = 12;
+
+constexpr int width = 10 * thread_count;
+constexpr int height = 10 * thread_count;
+constexpr int samples = 1;
+constexpr int max_bounces = 1;
 
 constexpr void setup_scene (World& world)
 {
-	int n = 50;
 	world.add_shape (new Sphere (Vec3 (0, -1000, 0), 1000, new Lambertian (Vec3 (0.5, 0.5, 0.5))));
-	int i = 1;
 	int x_range = 1;
 	int z_range = 1;
 	for (int a = -x_range; a < x_range; a++)
@@ -48,15 +48,15 @@ constexpr void setup_scene (World& world)
 					                   0.5 * (1 + world.random.get_float ())),
 					        0.5 * world.random.get_float ())));
 				}
-				else
-				{ // glass
-					world.add_shape (new Sphere (center, 0.2, new Dielectric (1.5)));
-				}
+				// else
+				//{ // glass
+				//	world.add_shape (new Sphere (center, 0.2, new Dielectric (1.5)));
+				//}
 			}
 		}
 	}
 
-	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, new Dielectric (1.5)));
+	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, new Lambertian (Vec3 (0.4, 1.0, 0.6))));
 	world.add_shape (new Sphere (Vec3 (-4, 1, 0), 1.0, new Lambertian (Vec3 (0.4, 0.2, 0.1))));
 	world.add_shape (new Sphere (Vec3 (4, 1, 0), 1.0, new Metal (Vec3 (0.7, 0.6, 0.5), 0.0)));
 }
@@ -91,12 +91,9 @@ constexpr auto raytrace ()
 {
 	World world{};
 	setup_scene (world);
-	// world.add_shape (new Sphere (Vec3 (0, -1.5, -3), 2, new Lambertian (Vec3 (0.5, 0.5, 0.5))));
-	// world.add_shape (new Sphere (Vec3 (0, 1, -1), 0.5, new Lambertian (Vec3 (0.5, 0.5, 0.5))));
-	// world.add_shape (new Sphere (Vec3 (0.5, 1, -1), 0.5, new UV ()));
-	Vec3 lookfrom{ 13, 2, 3 };
+	Vec3 lookfrom{ 1, 1, 2 };
 	Vec3 lookat = VEC3_ZERO;
-	Camera cam{ lookfrom, lookat, VEC3_UP, 90, static_cast<float> (width) / static_cast<float> (height) };
+	Camera cam{ lookfrom, lookat, VEC3_DOWN, 90, static_cast<float> (width) / static_cast<float> (height) };
 
 	Image<Color, x_size, y_size> framebuffer{};
 	for (int i = 0; i < x_size; i++)
@@ -106,8 +103,17 @@ constexpr auto raytrace ()
 			Vec3 color (0, 0, 0);
 			for (int s = 0; s < sample_count; s++)
 			{
-				float u = float (i + x_offset /*+ world.random.get_float ()*/) / float (width);
-				float v = float (j + y_offset /*+ world.random.get_float ()*/) / float (height);
+				float u = 0, v = 0;
+				if (sample_count == 1)
+				{
+					u = float (i + x_offset) / float (width);
+					v = float (j + y_offset) / float (height);
+				}
+				else
+				{
+					u = float (i + x_offset + world.random.get_float ()) / float (width);
+					v = float (j + y_offset + world.random.get_float ()) / float (height);
+				}
 				Ray r = cam.get_ray (u, v);
 				color += trace (r, world, 0);
 			}
