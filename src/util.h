@@ -15,30 +15,24 @@ template <typename T> constexpr T abs (T num) { return num >= 0 ? num : -num; }
 
 template <typename T> constexpr T pow (T x, int n)
 {
-	if (std::is_constant_evaluated ())
-	{
-		if (n == 0) return 1.0;
-		if (n == 1) return x;
 
-		if (n > 1)
+	if (n == 0) return 1.0;
+	if (n == 1) return x;
+
+	if (n > 1)
+	{
+		if (n & 1)
 		{
-			if (n & 1)
-			{
-				return x * pow (x, n - 1);
-			}
-			else
-			{
-				return pow (x, n / 2);
-			}
+			return x * pow (x, n - 1);
 		}
 		else
 		{
-			return 1.0 / pow (x, -n);
+			return pow (x, n / 2);
 		}
 	}
 	else
 	{
-		return std::pow (x, n);
+		return 1.0 / pow (x, -n);
 	}
 }
 
@@ -85,31 +79,23 @@ constexpr bool nearly_equal (const float a,
 
 constexpr float sqrt (float res)
 {
-	if (std::is_constant_evaluated ())
-	{
-		float l = 1;
-		float r = res;
+	float l = 1;
+	float r = res;
 
-		while (!nearly_equal (l, r))
+	while (!nearly_equal (l, r))
+	{
+		const auto mid = (r + l) / 2;
+		if (mid * mid >= res)
 		{
-			const auto mid = (r + l) / 2;
-			if (mid * mid >= res)
-			{
-				r = mid;
-			}
-			else
-			{
-				l = mid + 1;
-			}
+			r = mid;
 		}
-		return r;
+		else
+		{
+			l = mid + 1;
+		}
 	}
-	else
-	{
-		return std::sqrt (res);
-	}
+	return r;
 }
-
 // Taken from http://brnz.org/hbr/?p=1518
 
 // Based on code from
@@ -235,68 +221,44 @@ constexpr float trig_series (float x, float sum, float n, int i, int s, float t)
 
 constexpr float sin (float x)
 {
-	if (std::is_constant_evaluated ())
-	{
-		float sum = x;
-		float n = 6.0f;
-		int i = 4;
-		int s = 1;
-		float t = x * x * x;
+	float sum = x;
+	float n = 6.0f;
+	int i = 4;
+	int s = 1;
+	float t = x * x * x;
 
-		bool done = detail::feq (sum, sum + t * s / n);
-		while (!done)
-		{
-			sum += t * s / n;
-			n *= i * (i + 1);
-			i += 2;
-			s = -s;
-			t *= x * x;
-			done = detail::feq (sum, sum + t * s / n);
-		}
-		return sum;
-		// return trig_series (x, x, 6.0f, 4, -1, x * x * x);
-	}
-	else
+	bool done = detail::feq (sum, sum + t * s / n);
+	while (!done)
 	{
-		return std::sin (x);
+		sum += t * s / n;
+		n *= i * (i + 1);
+		i += 2;
+		s = -s;
+		t *= x * x;
+		done = detail::feq (sum, sum + t * s / n);
 	}
+	return sum;
+	// return trig_series (x, x, 6.0f, 4, -1, x * x * x);
 }
 constexpr float cos (float x)
 {
-	if (std::is_constant_evaluated ())
-	{
-		float sum = 1.0f;
-		float n = 2.0f;
-		int i = 3;
-		int s = -1;
-		float t = x * x;
+	float sum = 1.0f;
+	float n = 2.0f;
+	int i = 3;
+	int s = -1;
+	float t = x * x;
 
-		bool done = detail::feq (sum, sum + t * s / n);
-		while (!done)
-		{
-			sum += t * s / n;
-			n *= i * (i + 1);
-			i += 2;
-			s = -s;
-			t *= x * x;
-			done = detail::feq (sum, sum + t * s / n);
-		}
-		return sum;
-		// return trig_series (x, 1.0f, 2.0f, 3, -1, x * x);
-	}
-	else
+	bool done = detail::feq (sum, sum + t * s / n);
+	while (!done)
 	{
-		return std::cos (x);
+		sum += t * s / n;
+		n *= i * (i + 1);
+		i += 2;
+		s = -s;
+		t *= x * x;
+		done = detail::feq (sum, sum + t * s / n);
 	}
+	return sum;
+	// return trig_series (x, 1.0f, 2.0f, 3, -1, x * x);
 }
-constexpr float tan (float x)
-{
-	if (std::is_constant_evaluated ())
-	{
-		return sin (x) / cos (x);
-	}
-	else
-	{
-		return std::tan (x);
-	}
-}
+constexpr float tan (float x) { return sin (x) / cos (x); }

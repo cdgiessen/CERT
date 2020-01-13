@@ -15,8 +15,8 @@ constexpr int thread_count = 12;
 
 constexpr int width = 10 * thread_count;
 constexpr int height = 10 * thread_count;
-constexpr int samples = 1;
-constexpr int max_bounces = 1;
+constexpr int samples = 5;
+constexpr int max_bounces = 3;
 
 constexpr void setup_scene (World& world)
 {
@@ -77,12 +77,12 @@ constexpr Vec3 trace (const Ray& r, World& world, int depth)
 		// {
 		// 	auto light_ray = Ray (rec.p, );
 		// }
+		if (depth > max_bounces) return Vec3 (0, 0, 0);
 
-		Ray scattered;
-		Vec3 attenuation;
-		if (depth < max_bounces && rec.mat->scatter (r, rec, attenuation, scattered, world.random))
+		MaterialOut out = rec.mat->scatter (r.origin, r.direction, r, world.random);
+		if (out.is_scattered)
 		{
-			return attenuation * trace (scattered, world, depth + 1);
+			return out.attenuation * trace (out.scattered, world, depth + 1);
 		}
 		else
 		{
@@ -119,13 +119,13 @@ constexpr auto raytrace ()
 				float u = 0, v = 0;
 				if (sample_count == 1)
 				{
-					u = float (i + x_offset) / float (width);
-					v = float (j + y_offset) / float (height);
+					u = float(i + x_offset) / float(width);
+					v = float(j + y_offset) / float(height);
 				}
 				else
 				{
-					u = float (i + x_offset + world.random.get_float ()) / float (width);
-					v = float (j + y_offset + world.random.get_float ()) / float (height);
+					u = float(i + x_offset + world.random.get_float ()) / float(width);
+					v = float(j + y_offset + world.random.get_float ()) / float(height);
 				}
 				Ray r = cam.get_ray (u, v);
 				color += trace (r, world, 0);

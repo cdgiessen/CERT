@@ -13,6 +13,14 @@ struct Vec3
 	constexpr Vec3 () : x (0), y (0), z (0) {}
 	constexpr Vec3 (float x, float y, float z) : x (x), y (y), z (z) {}
 
+	constexpr float operator[] (const int index) const
+	{
+		if (index == 0) return x;
+		if (index == 1) return y;
+		if (index == 2) return z;
+		return std::numeric_limits<float>::signaling_NaN ();
+	}
+
 	const Vec3& operator+ () const { return *this; }
 	constexpr Vec3 operator- () const { return Vec3 (-x, -y, -z); }
 

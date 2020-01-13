@@ -2,24 +2,18 @@
 
 #include "ray.h"
 #include "vec3.h"
-
-struct Material;
-
-struct HitRecord
+struct MaterialOut
 {
-	bool hit;
-	float t;
-	Vec3 p;
-	Vec3 normal;
-	Material* mat;
+	bool is_scattered;
+	Vec3 attenuation;
+	Ray scattered;
 };
 
 struct Material
 {
 	constexpr Material (Vec3 albedo) : albedo (albedo) {}
 	constexpr virtual ~Material ();
-	constexpr virtual bool scatter (
-	    const Ray& r_in, const HitRecord& rec, Vec3& attenuation, Ray& scattered, PRNG& random) const = 0;
+	constexpr virtual MaterialOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const = 0;
 
 	Vec3 albedo;
 };
@@ -30,13 +24,11 @@ constexpr Material::~Material () {}
 struct Lambertian : public Material
 {
 	constexpr Lambertian (const Vec3& a) : Material (a) {}
-	constexpr virtual bool scatter (
-	    const Ray& r_in, const HitRecord& rec, Vec3& attenuation, Ray& scattered, PRNG& random) const
+	constexpr virtual MaterialOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const
 	{
-		Vec3 target = rec.p + rec.normal + random_in_unit_sphere (random);
-		scattered = Ray (rec.p, target - rec.p);
-		attenuation = albedo;
-		return true;
+		Vec3 target = point + normal + random_in_unit_sphere (random);
+		Ray scattered = Ray (point, target - point);
+		return { .is_scattered = true, .attenuation = albedo, .scattered = scattered };
 	}
 };
 
@@ -46,13 +38,10 @@ struct Metal : public Material
 	{
 		if (f >= 1) fuzz = 1;
 	}
-	constexpr virtual bool scatter (
-	    const Ray& r_in, const HitRecord& rec, Vec3& attenuation, Ray& scattered, PRNG& random) const
+	constexpr virtual MaterialOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const
 	{
-		Vec3 reflected = reflect (unit_vector (r_in.direction), rec.normal);
-		scattered = Ray (rec.p, reflected);
-		attenuation = albedo;
-		return (dot (scattered.direction, rec.normal) > 0);
+		Ray scattered = Ray (point, reflect (unit_vector (r_in.direction), normal));
+		return { .is_scattered = dot (scattered.direction, normal) > 0, .attenuation = albedo, .scattered = scattered };
 	}
 	float fuzz;
 };
@@ -82,29 +71,28 @@ struct Dielectric : public Material
 {
 
 	constexpr Dielectric (float ri) : Material (VEC3_ZERO), ref_idx (ri) {}
-	constexpr virtual bool scatter (
-	    const Ray& r_in, const HitRecord& rec, Vec3& attenuation, Ray& scattered, PRNG& random) const
+	constexpr virtual MaterialOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const
 	{
 		Vec3 outward_normal;
-		Vec3 reflected = reflect (r_in.direction, rec.normal);
+		Vec3 reflected = reflect (r_in.direction, normal);
 		float ni_over_nt = 0;
-		attenuation = Vec3 (1.0, 1.0, 1.0);
+		Vec3 attenuation = Vec3 (1.0, 1.0, 1.0);
 		Vec3 refracted;
 
 		float reflect_prob = 0;
 		float cosine = 0;
 
-		if (dot (r_in.direction, rec.normal) > 0)
+		if (dot (r_in.direction, normal) > 0)
 		{
-			outward_normal = -rec.normal;
+			outward_normal = -normal;
 			ni_over_nt = ref_idx;
-			cosine = ref_idx * dot (r_in.direction, rec.normal) / r_in.direction.length ();
+			cosine = ref_idx * dot (r_in.direction, normal) / r_in.direction.length ();
 		}
 		else
 		{
-			outward_normal = rec.normal;
+			outward_normal = normal;
 			ni_over_nt = 1.0 / ref_idx;
-			cosine = -dot (r_in.direction, rec.normal) / r_in.direction.length ();
+			cosine = -dot (r_in.direction, normal) / r_in.direction.length ();
 		}
 
 		if (refract (r_in.direction, outward_normal, ni_over_nt, refracted))
@@ -118,14 +106,12 @@ struct Dielectric : public Material
 
 		if (random.get_float () < reflect_prob)
 		{
-			scattered = Ray (rec.p, reflected);
+			return { true, attenuation, Ray (point, reflected) };
 		}
 		else
 		{
-			scattered = Ray (rec.p, refracted);
+			return { true, attenuation, Ray (point, reflected) };
 		}
-
-		return true;
 	}
 
 	float ref_idx;
@@ -134,10 +120,8 @@ struct Dielectric : public Material
 struct UV : public Material
 {
 	constexpr UV () : Material (VEC3_ZERO) {}
-	constexpr virtual bool scatter (
-	    const Ray& r_in, const HitRecord& rec, Vec3& attenuation, Ray& scattered, PRNG& random) const
+	constexpr virtual MaterialOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const
 	{
-		attenuation = 0.5 * (rec.normal + 1.0f);
-		return false;
+		return { .is_scattered = false, .attenuation = 0.5 * (normal + 1.0f), .scattered = Ray (VEC3_ZERO, VEC3_ZERO) };
 	}
 };

@@ -6,6 +6,16 @@
 #include "ray.h"
 #include "util.h"
 
+struct HitRecord
+{
+	bool hit;
+	float t;
+	Vec3 p;
+	Vec3 normal;
+	Material* mat;
+};
+
+
 struct Shape
 {
 	constexpr Shape () {}
