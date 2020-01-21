@@ -40,7 +40,7 @@ struct Metal : public Material
 	}
 	constexpr virtual MaterialOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const
 	{
-		Ray scattered = Ray (point, reflect (unit_vector (r_in.direction), normal));
+		Ray scattered = Ray (point, reflect (normalize (r_in.direction), normal));
 		return { .is_scattered = dot (scattered.direction, normal) > 0, .attenuation = albedo, .scattered = scattered };
 	}
 	float fuzz;
@@ -55,7 +55,7 @@ constexpr float schlick (float cosine, float ref_idx)
 
 constexpr bool refract (const Vec3& v, const Vec3& n, float ni_over_nt, Vec3& refracted)
 {
-	Vec3 uv = unit_vector (v);
+	Vec3 uv = normalize (v);
 	float dt = dot (uv, n);
 	float discriminant = 1.0 - ni_over_nt * ni_over_nt * (1 - dt * dt);
 	if (discriminant > 0)

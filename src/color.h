@@ -9,7 +9,7 @@ struct Color
 
 constexpr Color vec_to_color (Vec3 const& v)
 {
-	return { static_cast<uint8_t> (v.x * 255.99),
-		static_cast<uint8_t> (v.y * 255.99),
-		static_cast<uint8_t> (v.z * 255.99) };
+	return { static_cast<uint8_t> (clamp (v.x * 255.99, 0.0, 255.0)),
+		static_cast<uint8_t> (clamp (v.y * 255.99, 0.0, 255.0)),
+		static_cast<uint8_t> (clamp (v.z * 255.99, 0.0, 255.0)) };
 }

@@ -9,6 +9,10 @@
 
 template <class T> constexpr T const& min (const T& a, const T& b) { return (b < a) ? b : a; }
 template <class T> constexpr T const& max (const T& a, const T& b) { return (a < b) ? b : a; }
+template <class T> constexpr T const& clamp (const T& value, const T& min, const T& max)
+{
+	return value > max ? max : (value < min ? min : value);
+}
 
 template <typename T> constexpr T abs (T num) { return num >= 0 ? num : -num; }
 

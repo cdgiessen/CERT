@@ -10,12 +10,13 @@
 #include "ray.h"
 #include "shape.h"
 #include "sphere.h"
+#include "world.h"
 
 constexpr int thread_count = 12;
 
 constexpr int width = 10 * thread_count;
 constexpr int height = 10 * thread_count;
-constexpr int samples = 25;
+constexpr int samples = 15;
 constexpr int max_bounces = 1;
 
 constexpr void setup_scene (World& world)
@@ -65,7 +66,17 @@ constexpr void setup_scene (World& world)
 	world.add_shape (new Sphere (Vec3 (-4, 1, 0), 1.0, col2));
 	world.add_shape (new Sphere (Vec3 (4, 1, 0), 1.0, col3));
 
-	world.add_light (new DirLight (VEC3_ONE, Vec3 (1, -2, -2)));
+	world.add_light (new PointLight (Vec3 (1, 4, -2), VEC3_ONE, 100.0f));
+}
+
+constexpr void setup_simple_scene (World& world)
+{
+	auto grey = world.add_material (new Lambertian (Vec3 (0.5, 0.5, 0.5)));
+	world.add_shape (new Sphere (Vec3 (0, -1000, 0), 1000, grey));
+	auto col1 = world.add_material (new Lambertian (Vec3 (0.4, 1.0, 0.6)));
+	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, col1));
+
+	world.add_light (new PointLight (Vec3 (1, 4, -2), VEC3_ONE, 100.0f));
 }
 
 constexpr Vec3 trace (const Ray& r, World& world, int depth)
@@ -73,29 +84,25 @@ constexpr Vec3 trace (const Ray& r, World& world, int depth)
 	HitRecord rec = world.hit (r, 0.001, std::numeric_limits<float>::max ());
 	if (rec.hit)
 	{
-		// for (int i = 0; i < light_count; i++)
-		// {
-		// 	auto light_ray = Ray (rec.p, );
-		// }
 		if (depth > max_bounces) return Vec3 (0, 0, 0);
 
-		MaterialOut out = rec.mat->scatter (r.origin, r.direction, r, world.random);
-		if (out.is_scattered)
-		{
-			return out.attenuation * trace (out.scattered, world, depth + 1);
-		}
-		else
-		{
-			return Vec3 (0, 0, 0);
-		}
+		auto light_contribution = world.light_hit (rec.p, rec.normal);
+
+		// MaterialOut out = rec.mat->scatter (r.origin, r.direction, r, world.random);
+		// Vec3 bounce_contribution;
+		// if (out.is_scattered)
+		//{
+		//	bounce_contribution = out.attenuation * trace (out.scattered, world, depth + 1);
+		//}
+		// else
+		//{
+		//	bounce_contribution = Vec3 (1, 1, 1);
+		//}
+		return light_contribution; // * bounce_contribution;
 	}
 	else
 	{
-
-		// hit nothing - ie background
-		Vec3 unit_direction = unit_vector (r.direction);
-		float t = 0.5 * (unit_direction.y + 1.0);
-		return (1.0 - t) * Vec3 (1.0, 1.0, 1.0) + t * Vec3 (0.5, 0.7, 1.0);
+		return background_color (r.direction);
 	}
 }
 
@@ -103,7 +110,7 @@ template <std::size_t width, std::size_t height, std::size_t x_size, std::size_t
 constexpr auto raytrace ()
 {
 	World world{};
-	setup_scene (world);
+	setup_simple_scene (world);
 	Vec3 lookfrom{ 1, 1, 2 };
 	Vec3 lookat = VEC3_ZERO;
 	Camera cam{ lookfrom, lookat, VEC3_DOWN, 90, static_cast<float> (width) / static_cast<float> (height) };
@@ -116,17 +123,9 @@ constexpr auto raytrace ()
 			Vec3 color (0, 0, 0);
 			for (int s = 0; s < sample_count; s++)
 			{
-				float u = 0, v = 0;
-				if (sample_count == 1)
-				{
-					u = float (i + x_offset) / float (width);
-					v = float (j + y_offset) / float (height);
-				}
-				else
-				{
-					u = float (i + x_offset + world.random.get_float ()) / float (width);
-					v = float (j + y_offset + world.random.get_float ()) / float (height);
-				}
+				float u = float (i + x_offset + world.random.get_float ()) / float (width);
+				float v = float (j + y_offset + world.random.get_float ()) / float (height);
+
 				Ray r = cam.get_ray (u, v);
 				color += trace (r, world, 0);
 			}

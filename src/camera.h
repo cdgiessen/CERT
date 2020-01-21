@@ -12,8 +12,8 @@ class Camera
 		float half_height = tan (theta / 2);
 		float half_width = aspect * half_height;
 		origin = lookfrom;
-		w = unit_vector (lookfrom - lookat);
-		u = unit_vector (cross (vup, w));
+		w = normalize (lookfrom - lookat);
+		u = normalize (cross (vup, w));
 		v = cross (w, u);
 		lower_left_corner = origin - half_width * u - half_height * v - w;
 		horizontal = 2 * half_width * u;

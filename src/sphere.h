@@ -10,6 +10,28 @@ class Sphere : public Shape
 	{
 		this->mat = mat;
 	};
+
+	constexpr virtual bool intersects (const Ray& r, float t_min, float t_max) const
+	{
+		Vec3 oc = r.origin - center;
+		float a = dot (r.direction, r.direction);
+		float b = dot (oc, r.direction);
+		float c = dot (oc, oc) - radius * radius;
+		float discriminant = b * b - a * c;
+		if (discriminant <= 0) return false;
+		float negative = (-b - sqrt (discriminant)) / a;
+		if (negative < t_max && negative > t_min)
+		{
+			return true;
+		}
+		float positive = (-b + sqrt (discriminant)) / a;
+		if (positive < t_max && positive > t_min)
+		{
+			return true;
+		}
+		return false;
+	}
+
 	constexpr virtual HitRecord hit (const Ray& r, float t_min, float t_max) const
 	{
 		Vec3 oc = r.origin - center;
@@ -26,7 +48,7 @@ class Sphere : public Shape
 				out.hit = true;
 				out.t = negative;
 				out.p = r.point_at_parameter (out.t);
-				out.normal = unit_vector ((out.p - center) / radius);
+				out.normal = normalize ((out.p - center) / radius);
 				out.mat = mat;
 				return out;
 			}
@@ -37,7 +59,7 @@ class Sphere : public Shape
 				out.hit = true;
 				out.t = positive;
 				out.p = r.point_at_parameter (out.t);
-				out.normal = unit_vector ((out.p - center) / radius);
+				out.normal = normalize ((out.p - center) / radius);
 				out.mat = mat;
 				return out;
 			}

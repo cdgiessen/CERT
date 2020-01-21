@@ -33,12 +33,13 @@ struct Vec3
 
 	constexpr inline float length () const { return sqrt (x * x + y * y + z * z); }
 	constexpr inline float squared_length () const { return x * x + y * y + z * z; }
-	constexpr inline void make_unit_vector ()
+	constexpr inline Vec3& norm ()
 	{
 		float k = 1.0 / sqrt (x * x + y * y + z * z);
 		x *= k;
 		y *= k;
 		z *= k;
+		return *this;
 	}
 };
 
@@ -134,7 +135,7 @@ constexpr inline Vec3 cross (const Vec3& v1, const Vec3& v2)
 
 constexpr Vec3 reflect (const Vec3& v, const Vec3& n) { return v - 2 * dot (v, n) * n; }
 
-constexpr inline Vec3 unit_vector (const Vec3& v) { return v / v.length (); }
+constexpr inline Vec3 normalize (const Vec3& v) { return v / v.length (); }
 
 constexpr static Vec3 VEC3_ZERO = Vec3 (0.0f, 0.0f, 0.0f);
 constexpr static Vec3 VEC3_ONE = Vec3 (1.0f, 1.0f, 1.0f);
