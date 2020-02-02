@@ -13,7 +13,7 @@ class Ray
 	constexpr Vec3 point_at_parameter (float t) const { return origin + direction * t; }
 
 	Vec3 origin = VEC3_ZERO;
-	Vec3 direction = VEC3_ZERO;
+	Vec3 direction = VEC3_ONE;
 };
 
 constexpr Vec3 random_in_unit_sphere (PRNG& random)

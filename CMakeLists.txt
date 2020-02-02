@@ -12,3 +12,9 @@ add_executable(cert src/main.cpp
 set_property(TARGET cert PROPERTY CXX_STANDARD 20)
 
 target_compile_options(cert PUBLIC -std=c++2a -fconstexpr-steps=2147483647 -O3)
+
+add_executable(cert-test test/test_main.cpp)
+
+set_property(TARGET cert-test PROPERTY CXX_STANDARD 20)
+
+target_compile_options(cert-test PUBLIC -std=c++2a -fconstexpr-steps=2147483647 -O3)

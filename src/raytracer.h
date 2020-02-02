@@ -14,9 +14,9 @@
 
 constexpr int thread_count = 12;
 
-constexpr int width = 10 * thread_count;
-constexpr int height = 10 * thread_count;
-constexpr int samples = 15;
+constexpr int width = 25 * thread_count;
+constexpr int height = 25 * thread_count;
+constexpr int samples = 2; // this value is squared!
 constexpr int max_bounces = 1;
 
 constexpr void setup_scene (World& world)
@@ -76,7 +76,8 @@ constexpr void setup_simple_scene (World& world)
 	auto col1 = world.add_material (new Lambertian (Vec3 (0.4, 1.0, 0.6)));
 	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, col1));
 
-	world.add_light (new PointLight (Vec3 (1, 4, -2), VEC3_ONE, 100.0f));
+	world.add_light (new PointLight (Vec3 (1, 4, -2), VEC3_ONE, 10.0f));
+	world.add_light (new PointLight (Vec3 (-1, 3, 2), VEC3_ONE, 10.0f));
 }
 
 constexpr Vec3 trace (const Ray& r, World& world, int depth)
@@ -88,17 +89,15 @@ constexpr Vec3 trace (const Ray& r, World& world, int depth)
 
 		auto light_contribution = world.light_hit (rec.p, rec.normal);
 
-		// MaterialOut out = rec.mat->scatter (r.origin, r.direction, r, world.random);
-		// Vec3 bounce_contribution;
-		// if (out.is_scattered)
-		//{
-		//	bounce_contribution = out.attenuation * trace (out.scattered, world, depth + 1);
-		//}
-		// else
-		//{
-		//	bounce_contribution = Vec3 (1, 1, 1);
-		//}
-		return light_contribution; // * bounce_contribution;
+		MaterialOut out = rec.mat->scatter (r.origin, r.direction, r, world.random);
+		if (out.is_scattered)
+		{
+			return light_contribution * out.attenuation * trace (out.scattered, world, depth + 1);
+		}
+		else
+		{
+			return light_contribution * out.attenuation;
+		}
 	}
 	else
 	{
@@ -111,9 +110,9 @@ constexpr auto raytrace ()
 {
 	World world{};
 	setup_simple_scene (world);
-	Vec3 lookfrom{ 1, 1, 2 };
+	Vec3 lookfrom{ 3, 3, 3 };
 	Vec3 lookat = VEC3_ZERO;
-	Camera cam{ lookfrom, lookat, VEC3_DOWN, 90, static_cast<float> (width) / static_cast<float> (height) };
+	Camera cam{ lookfrom, lookat, VEC3_UP, 90, static_cast<float> (width) / static_cast<float> (height) };
 
 	Image<Color, x_size, y_size> framebuffer{};
 	for (int i = 0; i < x_size; i++)
@@ -121,17 +120,20 @@ constexpr auto raytrace ()
 		for (int j = 0; j < y_size; j++)
 		{
 			Vec3 color (0, 0, 0);
-			for (int s = 0; s < sample_count; s++)
+			for (float sX = 0; sX < sample_count; sX++)
 			{
-				float u = float (i + x_offset + world.random.get_float ()) / float (width);
-				float v = float (j + y_offset + world.random.get_float ()) / float (height);
+				for (float sY = 0; sY < sample_count; sY++)
+				{
+					float u = float (i + x_offset + sX / width) / float (width);
+					float v = float (j + y_offset + sY / height) / float (height);
 
-				Ray r = cam.get_ray (u, v);
-				color += trace (r, world, 0);
+					Ray r = cam.get_ray (u, v);
+					color += trace (r, world, 0);
+				}
 			}
-			color /= static_cast<float> (sample_count);
+			color /= static_cast<float> (sample_count * sample_count);
 
-			framebuffer.set (i, j, vec_to_color (color));
+			framebuffer.set (i, y_size - j - 1, vec_to_color (color));
 		}
 	}
 	return framebuffer;

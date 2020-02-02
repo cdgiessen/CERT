@@ -7,6 +7,8 @@
 #include <limits>
 #include <type_traits>
 
+constexpr float debug_float (float in) { return in / 0.0f; }
+
 template <class T> constexpr T const& min (const T& a, const T& b) { return (b < a) ? b : a; }
 template <class T> constexpr T const& max (const T& a, const T& b) { return (a < b) ? b : a; }
 template <class T> constexpr T const& clamp (const T& value, const T& min, const T& max)
@@ -81,25 +83,46 @@ constexpr bool nearly_equal (const float a,
 	return diff < max_relth;
 }
 
-constexpr float sqrt (float res)
+// Newton–Raphson method
+constexpr float sqrt (float x)
 {
-	float l = 1;
-	float r = res;
-
-	while (!nearly_equal (l, r))
+	if (0 <= x && x < std::numeric_limits<double>::infinity ())
 	{
-		const auto mid = (r + l) / 2;
-		if (mid * mid >= res)
+		double curr = x;
+		double prev = 0;
+		while (!nearly_equal (curr, prev))
 		{
-			r = mid;
+			prev = curr;
+			curr = 0.5 * (curr + x / curr);
 		}
-		else
-		{
-			l = mid + 1;
-		}
+		return curr;
 	}
-	return r;
+	else
+	{
+		return std::numeric_limits<double>::quiet_NaN ();
+	}
 }
+// old  version
+/*
+constexpr float sqrt (float x)
+{
+    float l = 1;
+    float r = res;
+    while (!nearly_equal (l, r))
+    {
+        const auto mid = (r + l) / 2.f;
+        if (mid * mid >= res)
+        {
+            r = mid;
+        }
+        else
+        {
+            l = mid + 1.f;
+        }
+    }
+    return r;
+}*/
+
 // Taken from http://brnz.org/hbr/?p=1518
 
 // Based on code from

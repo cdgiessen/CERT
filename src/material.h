@@ -26,9 +26,9 @@ struct Lambertian : public Material
 	constexpr Lambertian (const Vec3& a) : Material (a) {}
 	constexpr virtual MaterialOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const
 	{
-		Vec3 target = point + normal + random_in_unit_sphere (random);
-		Ray scattered = Ray (point, target - point);
-		return { .is_scattered = true, .attenuation = albedo, .scattered = scattered };
+		// 	Vec3 target = point + normal + random_in_unit_sphere (random);
+		// 	Ray scattered = Ray (point, target - point);
+		return { .is_scattered = false, .attenuation = albedo, .scattered = Ray (VEC3_ZERO, VEC3_ONE) };
 	}
 };
 
