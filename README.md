@@ -8,7 +8,7 @@ Currently in a proof of concept state, more features are to be added in the futu
 
 Example image output. 120 by 120 pixels at 25 samples per pixel.
 
-![](https://github.com/cdgiessen/CERT/blob/master/data/120x120at25ssp.jpg)
+![](https://github.com/cdgiessen/CERT/blob/master/data/300x300at4ssp_working_lights.jpg)
 
 ## Build Requirements
 Requires a C++20 ready compiler to build. Tested with clang-10.
