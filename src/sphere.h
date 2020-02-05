@@ -48,7 +48,7 @@ class Sphere : public Shape
 				out.hit = true;
 				out.t = negative;
 				out.p = r.point_at_parameter (out.t);
-				out.normal = normalize ((out.p - center) / radius);
+				out.normal = normalize ((out.p - center));
 				out.mat = mat;
 				return out;
 			}
@@ -59,7 +59,7 @@ class Sphere : public Shape
 				out.hit = true;
 				out.t = positive;
 				out.p = r.point_at_parameter (out.t);
-				out.normal = normalize ((out.p - center) / radius);
+				out.normal = normalize ((out.p - center));
 				out.mat = mat;
 				return out;
 			}

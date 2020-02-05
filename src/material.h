@@ -34,16 +34,14 @@ struct Lambertian : public Material
 
 struct Metal : public Material
 {
-	constexpr Metal (const Vec3& a, float f) : Material (a), fuzz (f)
-	{
-		if (f >= 1) fuzz = 1;
-	}
+	constexpr Metal (const Vec3& a) : Material (a) {}
 	constexpr virtual MaterialOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const
 	{
-		Ray scattered = Ray (point, reflect (normalize (r_in.direction), normal));
-		return { .is_scattered = dot (scattered.direction, normal) > 0, .attenuation = albedo, .scattered = scattered };
+		Vec3 reflected = reflect (normalize (r_in.direction), normal);
+		return { .is_scattered = dot (reflected, normal) > 0.0,
+			.attenuation = albedo,
+			.scattered = Ray (point, reflected) };
 	}
-	float fuzz;
 };
 
 constexpr float schlick (float cosine, float ref_idx)

@@ -14,18 +14,18 @@
 
 constexpr int thread_count = 12;
 
-constexpr int width = 25 * thread_count;
-constexpr int height = 25 * thread_count;
-constexpr int samples = 2; // this value is squared!
-constexpr int max_bounces = 1;
+constexpr int width = 70 * thread_count;
+constexpr int height = 70 * thread_count;
+constexpr int samples = 4; // this value is squared!
+constexpr int max_bounces = 25;
 
 constexpr void setup_scene (World& world)
 {
 	auto grey = world.add_material (new Lambertian (Vec3 (0.5, 0.5, 0.5)));
 	world.add_shape (new Sphere (Vec3 (0, -1000, 0), 1000, grey));
 
-	int x_range = 1;
-	int z_range = 1;
+	int x_range = 3;
+	int z_range = 3;
 	for (int a = -x_range; a < x_range; a++)
 	{
 		for (int b = -z_range; b < z_range; b++)
@@ -44,36 +44,40 @@ constexpr void setup_scene (World& world)
 				}
 				else if (choose_mat < 0.95)
 				{ // metal
-					auto metal =
-					    world.add_material (new Metal (Vec3 (0.5 * (1 + world.random.get_float ()),
-					                                       0.5 * (1 + world.random.get_float ()),
-					                                       0.5 * (1 + world.random.get_float ())),
-					        0.5 * world.random.get_float ()));
+					auto metal = world.add_material (new Metal (Vec3 (0.5 * (1 + world.random.get_float ()),
+					    0.5 * (1 + world.random.get_float ()),
+					    0.5 * (1 + world.random.get_float ()))));
 					world.add_shape (new Sphere (center, 0.2, metal));
 				}
-				// else
-				//{ // glass
-				//	world.add_shape (new Sphere (center, 0.2, new Dielectric (1.5)));
-				//}
+				else
+				{ // glass
+					auto glass = world.add_material (new Dielectric (1.5));
+					world.add_shape (new Sphere (center, 0.2, glass));
+				}
 			}
 		}
 	}
-	auto col1 = world.add_material (new Lambertian (Vec3 (0.4, 1.0, 0.6)));
-	auto col2 = world.add_material (new Lambertian (Vec3 (0.4, 0.2, 0.1)));
-	auto col3 = world.add_material (new Metal (Vec3 (0.7, 0.6, 0.5), 0.0));
+	auto col1 = world.add_material (new Metal (Vec3 (0.4, 1.0, 0.6)));
+	auto col2 = world.add_material (new Metal (Vec3 (0.4, 0.2, 0.1)));
+	auto col3 = world.add_material (new Metal (Vec3 (0.7, 0.6, 0.5)));
+	auto glass = world.add_material (new Dielectric (1.5));
 
-	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, col1));
-	world.add_shape (new Sphere (Vec3 (-4, 1, 0), 1.0, col2));
-	world.add_shape (new Sphere (Vec3 (4, 1, 0), 1.0, col3));
+	world.add_shape (new Sphere (Vec3 (-2, 1, 0), 1.0, col1));
+	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, glass));
+	world.add_shape (new Sphere (Vec3 (2, 1, 0), 1.0, col3));
 
-	world.add_light (new PointLight (Vec3 (1, 4, -2), VEC3_ONE, 100.0f));
+	world.add_light (new PointLight (Vec3 (2, 4, 2), VEC3_ONE, 15.0f));
+	world.add_light (new PointLight (Vec3 (2, 4, -2), VEC3_ONE, 15.0f));
+	world.add_light (new PointLight (Vec3 (-2, 4, 2), VEC3_ONE, 15.0f));
+	world.add_light (new PointLight (Vec3 (-2, 4, -2), VEC3_ONE, 15.0f));
 }
 
 constexpr void setup_simple_scene (World& world)
 {
 	auto grey = world.add_material (new Lambertian (Vec3 (0.5, 0.5, 0.5)));
-	world.add_shape (new Sphere (Vec3 (0, -1000, 0), 1000, grey));
 	auto col1 = world.add_material (new Lambertian (Vec3 (0.4, 1.0, 0.6)));
+
+	world.add_shape (new Sphere (Vec3 (0, -1000, 0), 1000, grey));
 	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, col1));
 
 	world.add_light (new PointLight (Vec3 (1, 4, -2), VEC3_ONE, 10.0f));
@@ -85,11 +89,11 @@ constexpr Vec3 trace (const Ray& r, World& world, int depth)
 	HitRecord rec = world.hit (r, 0.001, std::numeric_limits<float>::max ());
 	if (rec.hit)
 	{
-		if (depth > max_bounces) return Vec3 (0, 0, 0);
+		if (depth > max_bounces) return VEC3_ZERO;
 
 		auto light_contribution = world.light_hit (rec.p, rec.normal);
 
-		MaterialOut out = rec.mat->scatter (r.origin, r.direction, r, world.random);
+		MaterialOut out = rec.mat->scatter (rec.p, rec.normal, r, world.random);
 		if (out.is_scattered)
 		{
 			return light_contribution * out.attenuation * trace (out.scattered, world, depth + 1);
@@ -109,9 +113,10 @@ template <std::size_t width, std::size_t height, std::size_t x_size, std::size_t
 constexpr auto raytrace ()
 {
 	World world{};
-	setup_simple_scene (world);
-	Vec3 lookfrom{ 3, 3, 3 };
-	Vec3 lookat = VEC3_ZERO;
+	// setup_simple_scene (world);
+	setup_scene (world);
+	Vec3 lookfrom{ 2, 1, 4 };
+	Vec3 lookat{ 0, 1, 0 };
 	Camera cam{ lookfrom, lookat, VEC3_UP, 90, static_cast<float> (width) / static_cast<float> (height) };
 
 	Image<Color, x_size, y_size> framebuffer{};
@@ -120,12 +125,12 @@ constexpr auto raytrace ()
 		for (int j = 0; j < y_size; j++)
 		{
 			Vec3 color (0, 0, 0);
-			for (float sX = 0; sX < sample_count; sX++)
+			for (float sX = 0; sX < 1; sX += 1.0 / sample_count)
 			{
-				for (float sY = 0; sY < sample_count; sY++)
+				for (float sY = 0; sY < 1; sY += 1.0 / sample_count)
 				{
-					float u = float (i + x_offset + sX / width) / float (width);
-					float v = float (j + y_offset + sY / height) / float (height);
+					float u = float (i + x_offset + sX) / float (width);
+					float v = float (j + y_offset + sY) / float (height);
 
 					Ray r = cam.get_ray (u, v);
 					color += trace (r, world, 0);
@@ -133,7 +138,7 @@ constexpr auto raytrace ()
 			}
 			color /= static_cast<float> (sample_count * sample_count);
 
-			framebuffer.set (i, y_size - j - 1, vec_to_color (color));
+			framebuffer.set (i, j, vec_to_color (color));
 		}
 	}
 	return framebuffer;

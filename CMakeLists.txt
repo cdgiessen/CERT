@@ -10,11 +10,13 @@ add_executable(cert src/main.cpp
     src/color.h src/ray.h src/shape.h src/shape.h src/util.h src/vec3.h)
 
 set_property(TARGET cert PROPERTY CXX_STANDARD 20)
-
 target_compile_options(cert PUBLIC -std=c++2a -fconstexpr-steps=2147483647 -O3)
+
+add_executable(rt-runtime src/runtime.cpp 
+    src/color.h src/ray.h src/shape.h src/shape.h src/util.h src/vec3.h)
+set_property(TARGET rt-runtime PROPERTY CXX_STANDARD 20)
 
 add_executable(cert-test test/test_main.cpp)
 
 set_property(TARGET cert-test PROPERTY CXX_STANDARD 20)
-
 target_compile_options(cert-test PUBLIC -std=c++2a -fconstexpr-steps=2147483647 -O3)

@@ -15,18 +15,18 @@ class Camera
 		w = normalize (lookfrom - lookat);
 		u = normalize (cross (vup, w));
 		v = cross (w, u);
-		lower_left_corner = origin - half_width * u - half_height * v - w;
+		upper_left_corner = origin - half_width * u + half_height * v - w;
 		horizontal = 2 * half_width * u;
 		vertical = 2 * half_height * v;
 	}
 
 	constexpr Ray get_ray (float u, float v)
 	{
-		return Ray (origin, lower_left_corner + u * horizontal + v * vertical - origin);
+		return Ray (origin, upper_left_corner + u * horizontal - v * vertical - origin);
 	}
 
 	Vec3 origin;
-	Vec3 lower_left_corner;
+	Vec3 upper_left_corner;
 	Vec3 horizontal;
 	Vec3 vertical;
 };
