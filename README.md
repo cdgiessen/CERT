@@ -6,9 +6,9 @@ Through the power of `constexpr`, we can trace rays in a place that was never me
 
 Currently in a proof of concept state, more features are to be added in the future.
 
-Example image output. 120 by 120 pixels at 25 samples per pixel.
+Example image output.
 
-![](https://github.com/cdgiessen/CERT/blob/master/data/840x840at16ssp_fixed_metal_reflections.png)
+![](https://github.com/cdgiessen/CERT/blob/master/data/840x840at16spp_fixed_metal_reflections.png)
 
 ## Build Requirements
 Requires a C++20 ready compiler to build. Tested with clang-10.
