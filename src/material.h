@@ -7,9 +7,9 @@ struct ScatterOut
 {
 	bool is_scattered;
 	Vec3 attenuation;
-	Ray scattered = Ray (VEC3_ZERO, VEC3_ONE);
+	Ray scattered = Ray (VEC3_ZERO, VEC3_RIGHT);
 	float index = -1.0f;
-	Ray refracted = Ray (VEC3_ZERO, VEC3_ONE);
+	Ray refracted = Ray (VEC3_ZERO, VEC3_RIGHT);
 };
 
 struct Material
@@ -99,15 +99,16 @@ struct Dielectric : public Material
 		if (refracted.is_refracted)
 		{
 			reflect_prob = schlick (cosine, ref_idx);
+			return { true,
+				Vec3 (1.0, 1.0, 1.0),
+				Ray (point, reflected),
+				reflect_prob,
+				Ray (point, refracted.refracted) };
 		}
 		else
 		{
-			reflect_prob = 1.0;
+			return { true, Vec3 (1.0, 1.0, 1.0), Ray (point, reflected), 0.0 };
 		}
-
-		return {
-			true, Vec3 (1.0, 1.0, 1.0), Ray (point, reflected), reflect_prob, Ray (point, refracted.refracted)
-		};
 	}
 
 	float ref_idx;

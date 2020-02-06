@@ -17,7 +17,7 @@ constexpr int thread_count = 12;
 constexpr int width = 25 * thread_count;
 constexpr int height = 25 * thread_count;
 constexpr int samples = 2; // this value is squared!
-constexpr int max_bounces = 5;
+constexpr int max_bounces = 4;
 
 constexpr void setup_scene (World& world)
 {
@@ -60,10 +60,10 @@ constexpr void setup_scene (World& world)
 	auto col1 = world.add_material (new Metal (Vec3 (0.4, 1.0, 0.6)));
 	auto col2 = world.add_material (new Metal (Vec3 (0.4, 0.2, 0.1)));
 	auto col3 = world.add_material (new Metal (Vec3 (0.7, 0.6, 0.5)));
-	auto glass = world.add_material (new Dielectric (1.05f));
+	auto glass = world.add_material (new Dielectric (1.5f));
 
 	world.add_shape (new Sphere (Vec3 (-2, 1, 0), 1.0, col1));
-	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, col2));
+	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, glass));
 	world.add_shape (new Sphere (Vec3 (2, 1, 0), 1.0, col3));
 
 	world.add_light (new PointLight (Vec3 (2, 4, 2), VEC3_ONE, 15.0f));

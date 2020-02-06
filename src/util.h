@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cmath>
 #include <cstdint>
 #include <cstring>
 
@@ -39,6 +38,33 @@ constexpr float my_pow (float x, int n)
 	{
 		return 1.0 / my_pow (x, -n);
 	}
+}
+
+constexpr float my_pow_iterative (float x, int n)
+{
+	if (n == 0) return 1.0;
+	if (n == 1) return x;
+	float m_x = 0;
+	int m_n = (n < 0) ? -n;
+	n;
+	while (m_n > 1)
+	{
+		if (m_n & 1)
+		{
+			m_x *= x;
+			m_n--;
+		}
+		else
+		{
+			m_x *= m_x;
+			m_n /= 2;
+		}
+	}
+
+	if (n < 0)
+		return 1.0 / m_x;
+	else
+		return m_x;
 }
 
 struct PRNG
