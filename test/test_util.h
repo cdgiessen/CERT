@@ -1,5 +1,4 @@
 #include "../src/util.h"
-
 constexpr void run_util_test ()
 {
 	constexpr float p_1 = 0.1f;
@@ -48,4 +47,20 @@ constexpr void run_util_test ()
 	static_assert (nearly_equal (four_s, 4.0f));
 	constexpr float five_s = sqrt (25.0f);
 	static_assert (nearly_equal (five_s, 5.0f));
+
+	static_assert (nearly_equal (my_pow (0.0, 3), 0));
+	static_assert (nearly_equal (my_pow (0.2, 3), 0.008));
+	static_assert (nearly_equal (my_pow (0.5, 3), 0.125));
+	static_assert (nearly_equal (my_pow (0.8, 3), 0.512));
+	static_assert (nearly_equal (my_pow (1.0, 3), 1.0));
+	static_assert (nearly_equal (my_pow (1.2, 3), 1.728));
+
+	static_assert (nearly_equal (9.0f, my_pow (3.0f, 2)), "pow(3.0f, 2)");
+	static_assert (nearly_equal (0.111111f, my_pow (3.0f, -2)), "pow(3.0f, -2)");
+	static_assert (nearly_equal (1024.0, my_pow (2, 10)), "pow(2, 10)");
+
+	static_assert (nearly_equal (my_pow (-2, 1), -2), "pow(-2, -3)");
+	static_assert (nearly_equal (my_pow (-2, 2), 4), "pow(-2, -3)");
+	static_assert (nearly_equal (my_pow (-2, 3), -8), "pow(-2, -3)");
+	static_assert (nearly_equal (my_pow (-2, -3), -0.125), "pow(-2, -3)");
 }

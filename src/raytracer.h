@@ -14,10 +14,10 @@
 
 constexpr int thread_count = 12;
 
-constexpr int width = 70 * thread_count;
-constexpr int height = 70 * thread_count;
-constexpr int samples = 4; // this value is squared!
-constexpr int max_bounces = 25;
+constexpr int width = 25 * thread_count;
+constexpr int height = 25 * thread_count;
+constexpr int samples = 2; // this value is squared!
+constexpr int max_bounces = 5;
 
 constexpr void setup_scene (World& world)
 {
@@ -49,21 +49,21 @@ constexpr void setup_scene (World& world)
 					    0.5 * (1 + world.random.get_float ()))));
 					world.add_shape (new Sphere (center, 0.2, metal));
 				}
-				else
-				{ // glass
-					auto glass = world.add_material (new Dielectric (1.5));
-					world.add_shape (new Sphere (center, 0.2, glass));
-				}
+				// else
+				//{ // glass
+				//	auto glass = world.add_material (new Dielectric (1.5));
+				//	world.add_shape (new Sphere (center, 0.2, glass));
+				//}
 			}
 		}
 	}
 	auto col1 = world.add_material (new Metal (Vec3 (0.4, 1.0, 0.6)));
 	auto col2 = world.add_material (new Metal (Vec3 (0.4, 0.2, 0.1)));
 	auto col3 = world.add_material (new Metal (Vec3 (0.7, 0.6, 0.5)));
-	auto glass = world.add_material (new Dielectric (1.5));
+	auto glass = world.add_material (new Dielectric (1.05f));
 
 	world.add_shape (new Sphere (Vec3 (-2, 1, 0), 1.0, col1));
-	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, glass));
+	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, col2));
 	world.add_shape (new Sphere (Vec3 (2, 1, 0), 1.0, col3));
 
 	world.add_light (new PointLight (Vec3 (2, 4, 2), VEC3_ONE, 15.0f));
@@ -93,8 +93,21 @@ constexpr Vec3 trace (const Ray& r, World& world, int depth)
 
 		auto light_contribution = world.light_hit (rec.p, rec.normal);
 
-		MaterialOut out = rec.mat->scatter (rec.p, rec.normal, r, world.random);
-		if (out.is_scattered)
+		ScatterOut out = rec.mat->scatter (rec.p, rec.normal, r, world.random);
+		if (out.index >= 0.0f)
+		{
+			if (out.index >= 1.0f)
+			{
+				return trace (out.refracted, world, depth + 1);
+			}
+			else
+			{
+				Vec3 reflect_contrib = trace (out.scattered, world, depth + 1);
+				Vec3 refract_contrib = trace (out.refracted, world, depth + 1);
+				return out.index * reflect_contrib + (1.0 - out.index) * refract_contrib;
+			}
+		}
+		else if (out.is_scattered)
 		{
 			return light_contribution * out.attenuation * trace (out.scattered, world, depth + 1);
 		}
@@ -115,8 +128,8 @@ constexpr auto raytrace ()
 	World world{};
 	// setup_simple_scene (world);
 	setup_scene (world);
-	Vec3 lookfrom{ 2, 1, 4 };
-	Vec3 lookat{ 0, 1, 0 };
+	Vec3 lookfrom{ 0, 1, 3 };
+	Vec3 lookat{ 0, 0, 0 };
 	Camera cam{ lookfrom, lookat, VEC3_UP, 90, static_cast<float> (width) / static_cast<float> (height) };
 
 	Image<Color, x_size, y_size> framebuffer{};

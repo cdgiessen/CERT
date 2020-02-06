@@ -19,9 +19,8 @@ template <class T> constexpr T const& clamp (const T& value, const T& min, const
 template <typename T> constexpr T abs (T num) { return num >= 0 ? num : -num; }
 
 
-template <typename T> constexpr T pow (T x, int n)
+constexpr float my_pow (float x, int n)
 {
-
 	if (n == 0) return 1.0;
 	if (n == 1) return x;
 
@@ -29,16 +28,16 @@ template <typename T> constexpr T pow (T x, int n)
 	{
 		if (n & 1)
 		{
-			return x * pow (x, n - 1);
+			return x * my_pow (x, n - 1);
 		}
 		else
 		{
-			return pow (x, n / 2);
+			return my_pow (x, n / 2) * my_pow (x, n / 2);
 		}
 	}
 	else
 	{
-		return 1.0 / pow (x, -n);
+		return 1.0 / my_pow (x, -n);
 	}
 }
 
