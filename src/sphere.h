@@ -35,6 +35,13 @@ class Sphere : public Shape
 		return false;
 	}
 
+	constexpr UV get_sphere_uv (Vec3 const& point) const
+	{
+		float phi = atan2 (p.z, p.x);
+		float theta = asin (p.y);
+		return { .u = 1.f - (phi + PI) / (2.f * PI), .v = (theta + PI / 2.f) / PI };
+	}
+
 	constexpr virtual HitRecord hit (const Ray& r, float t_min, float t_max) const
 	{
 		Vec3 oc = r.origin - center;
@@ -53,6 +60,7 @@ class Sphere : public Shape
 				out.p = r.point_at_parameter (out.t);
 				out.normal = normalize ((out.p - center));
 				out.mat = mat;
+				out.uv = get_sphere_uv ((out.p - center) / radius);
 				return out;
 			}
 			float positive = (-b + sqrt (discriminant)) / a;
@@ -64,6 +72,7 @@ class Sphere : public Shape
 				out.p = r.point_at_parameter (out.t);
 				out.normal = normalize ((out.p - center));
 				out.mat = mat;
+				out.uv = get_sphere_uv ((out.p - center) / radius);
 				return out;
 			}
 		}

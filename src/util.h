@@ -9,6 +9,8 @@
 namespace cert
 {
 
+constexpr float PI = 3.14159265358979323846;
+
 constexpr float debug_float (float in) { return in / 0.0f; }
 
 template <class T> constexpr T const& min (const T& a, const T& b) { return (b < a) ? b : a; }
@@ -273,7 +275,7 @@ constexpr float sin (float x)
 	int s = 1;
 	float t = x * x * x;
 
-	bool done = detail::feq (sum, sum + t * s / n);
+	bool done = nearly_equal (sum, sum + t * s / n);
 	while (!done)
 	{
 		sum += t * s / n;
@@ -281,7 +283,7 @@ constexpr float sin (float x)
 		i += 2;
 		s = -s;
 		t *= x * x;
-		done = detail::feq (sum, sum + t * s / n);
+		done = nearly_equal (sum, sum + t * s / n);
 	}
 	return sum;
 	// return trig_series (x, x, 6.0f, 4, -1, x * x * x);
@@ -294,7 +296,7 @@ constexpr float cos (float x)
 	int s = -1;
 	float t = x * x;
 
-	bool done = detail::feq (sum, sum + t * s / n);
+	bool done = nearly_equal (sum, sum + t * s / n);
 	while (!done)
 	{
 		sum += t * s / n;
@@ -302,12 +304,74 @@ constexpr float cos (float x)
 		i += 2;
 		s = -s;
 		t *= x * x;
-		done = detail::feq (sum, sum + t * s / n);
+		done = nearly_equal (sum, sum + t * s / n);
 	}
 	return sum;
 	// return trig_series (x, 1.0f, 2.0f, 3, -1, x * x);
 }
 constexpr float tan (float x) { return sin (x) / cos (x); }
+
+namespace detail
+{
+float constexpr float asin_series (float x, float sum, int n, float t)
+{
+	return nearly_equal (sum, sum + t * static_cast<float> (n) / (n + 2)) ?
+	           sum :
+	           asin_series (x,
+	               sum + t * static_cast<float> (n) / (n + 2),
+	               n + 2,
+	               t * x * x * static_cast<T> (n) / (n + 3));
+}
+} // namespace detail
+constexpr float asin (float x)
+{
+	if (nearly_equal (x, -1.f)) return PI / -2.f;
+	if (nearly_equal (x, 1.f)) return PI / 2.f;
+	if (x > -1.f && x < 1.f) return detail::asin_series (x, x, 1, x * x * x / 2.f);
+
+	// error
+	return 0.f / 0.f;
+}
+
+// arctan by Euler's series
+namespace detail
+{
+
+constexpr float atan_term (float x2, int k)
+{
+	return (2.f * k * x2) / ((2.f * (k) + 1.f) * (1.f + x2));
+}
+
+constexpr float atan_product (float x, int k)
+{
+	if (k == 1)
+		return atan_term (x * x, k);
+	else
+		return atan_term (x * x, k) * atan_product (x, k - 1);
+}
+
+constexpr float atan_sum (float x, float sum, int n)
+{
+	if (sum + atan_product (x, n) == sum)
+		return sum;
+	else
+		return atan_sum (x, sum + atan_product (x, n), n + 1);
+}
+} // namespace detail
+
+constexpr float atan (float x) { return x / (1.f + x * x) * detail::atan_sum (x, 1.f, 1); }
+
+constexpr float atan2 (float x, float y)
+{
+	if (x > 0) return atan (y / x);
+	if (y >= 0 && x < 0) return atan (y / x) + PI;
+	if (y < 0 && x < 0) return atan (y / x) - PI;
+	if (y > 0 && nearly_equal (x, 0)) return PI / 2.f;
+	if (y < 0 && nearly_equal (x, 0)) return -PI / 2.f;
+
+	// error
+	return 0.f / 0.f;
+}
 
 struct UV
 {

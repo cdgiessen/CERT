@@ -21,6 +21,27 @@ constexpr int max_bounces = 5;
 
 namespace cert
 {
+constexpr Texture* create_checker_tex (int tile_width, int tile_count)
+{
+	auto tex = new Texture (tile_count * tile_width, tile_count * tile_width);
+	bool is_black = false; // else is white
+	for (int i = 0; i < tile_count; i++)
+	{
+		for (int j = 0; j < tile_count; j++)
+		{
+			Vec3 color = is_black ? VEC3_ZERO : VEC3_ONE;
+			for (int k = 0; k < tile_width; k++)
+			{
+				tex->set (i * tile_width + k, j * tile_width + k, color);
+			}
+			is_black = !is_black;
+		}
+		if (tile_count % 2 == 0) is_black = !is_black;
+	}
+	return tex;
+}
+
+
 constexpr void setup_scene (World& world)
 {
 	auto grey = world.add_material (new Lambertian (Vec3 (0.5, 0.5, 0.5)));
@@ -59,16 +80,16 @@ constexpr void setup_scene (World& world)
 			}
 		}
 	}
-
-
+	auto checker_tex = world.add_texture (create_checker_tex (20, 5));
 
 	auto col1 = world.add_material (new Metal (Vec3 (0.4, 1.0, 0.6)));
 	auto col2 = world.add_material (new Metal (Vec3 (0.4, 0.2, 0.1)));
 	auto col3 = world.add_material (new Metal (Vec3 (0.7, 0.6, 0.5)));
 	auto glass = world.add_material (new Dielectric (1.5f));
+	auto checker_mat = world.add_material (new DiffuseTex (checker_tex));
 
 	world.add_shape (new Sphere (Vec3 (-2, 1, 0), 1.0, col1));
-	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, glass));
+	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, checker_mat));
 	world.add_shape (new Sphere (Vec3 (2, 1, 0), 1.0, col3));
 
 	world.add_light (new PointLight (Vec3 (2, 4, 2), VEC3_ONE, 15.0f));
