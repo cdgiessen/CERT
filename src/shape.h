@@ -4,6 +4,8 @@
 #include "ray.h"
 #include "vec3.h"
 
+namespace cert
+{
 struct HitRecord
 {
 	bool hit;
@@ -11,7 +13,8 @@ struct HitRecord
 	Vec3 p;
 	Vec3 normal;
 	Material* mat;
-};
+	UV uv;
+}; // namespace certstructHitRecord
 
 
 struct Shape
@@ -25,3 +28,4 @@ struct Shape
 };
 
 constexpr Shape::~Shape () {}
+} // namespace cert

@@ -2,6 +2,9 @@
 
 #include "shape.h"
 
+
+namespace cert
+{
 class Sphere : public Shape
 {
 	public:
@@ -64,8 +67,9 @@ class Sphere : public Shape
 				return out;
 			}
 		}
-		return HitRecord{ false, 0, { 0, 0, 0 }, { 0, 0, 0 } };
+		return HitRecord{ false, 0.f, { 0.f, 0.f, 0.f }, { 0.f, 0.f, 0.f }, nullptr, { 0.f, 0.f } };
 	}
 	Vec3 center = VEC3_ZERO;
 	float radius = 1.0;
 };
+} // namespace cert

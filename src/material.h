@@ -3,6 +3,9 @@
 #include "ray.h"
 #include "vec3.h"
 
+#include "image.h"
+namespace cert
+{
 struct ScatterOut
 {
 	bool is_scattered;
@@ -17,7 +20,8 @@ struct Material
 	constexpr Material (Vec3 albedo) : albedo (albedo) {}
 	constexpr virtual ~Material ();
 
-	constexpr virtual ScatterOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const = 0;
+	constexpr virtual ScatterOut scatter (
+	    Vec3 point, Vec3 normal, UV uv, const Ray& r_in, PRNG& random) const = 0;
 
 	Vec3 albedo;
 };
@@ -28,7 +32,7 @@ constexpr Material::~Material () {}
 struct Lambertian : public Material
 {
 	constexpr Lambertian (const Vec3& a) : Material (a) {}
-	constexpr virtual ScatterOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const
+	constexpr virtual ScatterOut scatter (Vec3 point, Vec3 normal, UV uv, const Ray& r_in, PRNG& random) const
 	{
 		return { .is_scattered = false, .attenuation = albedo };
 	}
@@ -37,7 +41,7 @@ struct Lambertian : public Material
 struct Metal : public Material
 {
 	constexpr Metal (const Vec3& a) : Material (a) {}
-	constexpr virtual ScatterOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const
+	constexpr virtual ScatterOut scatter (Vec3 point, Vec3 normal, UV uv, const Ray& r_in, PRNG& random) const
 	{
 		Vec3 reflected = reflect (normalize (r_in.direction), normal);
 		return { .is_scattered = dot (reflected, normal) > 0.0,
@@ -50,7 +54,7 @@ constexpr float schlick (float cosine, float ref_idx)
 {
 	float r0 = (1 - ref_idx) / (1 + ref_idx);
 	r0 = r0 * r0;
-	return r0 + (1 - r0) * my_pow ((1 - cosine), 5);
+	return r0 + (1 - r0) * pow ((1 - cosine), 5);
 }
 
 struct RefractDataOut
@@ -76,7 +80,7 @@ struct Dielectric : public Material
 {
 
 	constexpr Dielectric (float ri) : Material (VEC3_ZERO), ref_idx (ri) {}
-	constexpr virtual ScatterOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const
+	constexpr virtual ScatterOut scatter (Vec3 point, Vec3 normal, UV uv, const Ray& r_in, PRNG& random) const
 	{
 		Vec3 outward_normal;
 		Vec3 reflected = reflect (r_in.direction, normal);
@@ -114,11 +118,13 @@ struct Dielectric : public Material
 	float ref_idx;
 };
 
-struct UV : public Material
+struct DiffuseTex : public Material
 {
-	constexpr UV () : Material (VEC3_ZERO) {}
-	constexpr virtual ScatterOut scatter (Vec3 point, Vec3 normal, const Ray& r_in, PRNG& random) const
+	constexpr DiffuseTex (Texture* tex) : Material (VEC3_ZERO) {}
+	constexpr virtual ScatterOut scatter (Vec3 point, Vec3 normal, UV uv, const Ray& r_in, PRNG& random) const
 	{
-		return { .is_scattered = false, .attenuation = 0.5 * (normal + 1.0f) };
+		return { .is_scattered = false, .attenuation = tex->sample (uv) };
 	}
+	Texture* tex;
 };
+} // namespace cert

@@ -1,6 +1,7 @@
 #include "shape.h"
 
-
+namespace cert
+{
 class Rect : public Shape
 {
 	public:
@@ -33,3 +34,4 @@ HitRecord Rect::hit (const Ray& r, float t0, float t1) const
 	rec.normal = VEC3_FORWARD;
 	return {};
 }
+} // namespace cert

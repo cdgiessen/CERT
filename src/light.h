@@ -3,6 +3,8 @@
 #include "ray.h"
 #include "vec3.h"
 
+namespace cert
+{
 struct LightRayRecord
 {
 	bool visible;
@@ -53,3 +55,4 @@ struct SpotLight : public Light
 	float strength;
 	float cutoff;
 };
+} // namespace cert

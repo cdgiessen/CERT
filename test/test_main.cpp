@@ -12,6 +12,5 @@ constexpr int run_tests ()
 int main ()
 {
 	constexpr int res = run_tests ();
-	std::cout << my_pow (-2, -3) << "\n";
 	return 0;
 }

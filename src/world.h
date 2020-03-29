@@ -7,6 +7,8 @@
 #include "shape.h"
 #include "util.h"
 
+namespace cert
+{
 constexpr Vec3 background_color (Vec3 direction)
 {
 	Vec3 unit_direction = normalize (direction);
@@ -48,7 +50,11 @@ struct World
 		lights.push_back (light);
 		return light;
 	}
-
+	constexpr Texture* add_texture (Texture* texture)
+	{
+		textures.push_back (texture);
+		return texture;
+	}
 	constexpr HitRecord hit (const Ray& r, float t_min, float t_max) const
 	{
 		HitRecord return_rec{};
@@ -101,4 +107,6 @@ struct World
 	DynamicArray<Shape*> shapes;
 	DynamicArray<Material*> materials;
 	DynamicArray<Light*> lights;
+	DynamicArray<Texture*> textures;
 };
+} // namespace cert

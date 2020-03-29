@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ray.h"
+namespace cert
+{
 
 class Camera
 {
@@ -30,3 +32,4 @@ class Camera
 	Vec3 horizontal;
 	Vec3 vertical;
 };
+}

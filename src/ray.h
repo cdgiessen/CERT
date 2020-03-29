@@ -2,7 +2,8 @@
 
 #include "util.h"
 #include "vec3.h"
-
+namespace cert
+{
 class Ray
 {
 	public:
@@ -51,3 +52,4 @@ class AABB
 	Vec3 mininum;
 	Vec3 maximum;
 };
+}

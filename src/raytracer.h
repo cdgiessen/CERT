@@ -14,11 +14,13 @@
 
 constexpr int thread_count = 12;
 
-constexpr int width = 25 * thread_count;
-constexpr int height = 25 * thread_count;
-constexpr int samples = 2; // this value is squared!
-constexpr int max_bounces = 4;
+constexpr int width = 10 * thread_count;
+constexpr int height = 10 * thread_count;
+constexpr int samples = 3; // this value is squared!
+constexpr int max_bounces = 5;
 
+namespace cert
+{
 constexpr void setup_scene (World& world)
 {
 	auto grey = world.add_material (new Lambertian (Vec3 (0.5, 0.5, 0.5)));
@@ -57,6 +59,9 @@ constexpr void setup_scene (World& world)
 			}
 		}
 	}
+
+
+
 	auto col1 = world.add_material (new Metal (Vec3 (0.4, 1.0, 0.6)));
 	auto col2 = world.add_material (new Metal (Vec3 (0.4, 0.2, 0.1)));
 	auto col3 = world.add_material (new Metal (Vec3 (0.7, 0.6, 0.5)));
@@ -93,7 +98,7 @@ constexpr Vec3 trace (const Ray& r, World& world, int depth)
 
 		auto light_contribution = world.light_hit (rec.p, rec.normal);
 
-		ScatterOut out = rec.mat->scatter (rec.p, rec.normal, r, world.random);
+		ScatterOut out = rec.mat->scatter (rec.p, rec.normal, rec.uv, r, world.random);
 		if (out.index >= 0.0f)
 		{
 			if (out.index >= 1.0f)
@@ -132,7 +137,7 @@ constexpr auto raytrace ()
 	Vec3 lookat{ 0, 0, 0 };
 	Camera cam{ lookfrom, lookat, VEC3_UP, 90, static_cast<float> (width) / static_cast<float> (height) };
 
-	Image<Color, x_size, y_size> framebuffer{};
+	OutputImage<Color, x_size, y_size> framebuffer{};
 	for (int i = 0; i < x_size; i++)
 	{
 		for (int j = 0; j < y_size; j++)
@@ -156,3 +161,4 @@ constexpr auto raytrace ()
 	}
 	return framebuffer;
 }
+} // namespace cert

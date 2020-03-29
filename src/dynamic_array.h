@@ -1,6 +1,7 @@
 #pragma once
 
-
+namespace cert
+{
 template <typename T> class DynamicArray
 {
 	T* m_data = nullptr;
@@ -96,11 +97,16 @@ template <typename T> class DynamicArray
 		m_size++;
 	}
 
-	constexpr void erase (std::size_t index) {}
+	constexpr void erase (std::size_t index)
+	{
+		// TODO: make shrinking vector
+	}
 
 	constexpr void reset () { m_size = 0; }
 
 	constexpr T const& at (std::size_t index) const { return m_data[index]; }
+	constexpr T& at (std::size_t index) { return m_data[index]; }
 	constexpr std::size_t size () const { return m_size; }
 	constexpr T* data () const { return m_data; }
 };
+} // namespace cert

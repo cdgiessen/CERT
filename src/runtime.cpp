@@ -19,13 +19,12 @@ void runtime ()
 {
 	std::ofstream ppm ("output_runtime.ppm");
 	ppm << "P3\n" << width << " " << height << "\n255\n";
-	print_image (ppm, raytrace<width, height, width, height, 0, 0, samples> ());
+	print_image (ppm, cert::raytrace<width, height, width, height, 0, 0, samples> ());
 }
 
 int main (int argc, char** argv)
 {
-
 	std::ofstream ppm ("output_runtime.ppm");
 	ppm << "P3\n" << width << " " << height << "\n255\n";
-	print_image (ppm, raytrace<width, height, width, height, 0, 0, samples> ());
+	print_image (ppm, cert::raytrace<width, height, width, height, 0, 0, samples> ());
 }

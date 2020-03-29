@@ -4,6 +4,8 @@
 
 #include "util.h"
 
+namespace cert
+{
 struct Vec3
 {
 	float x = 0;
@@ -145,3 +147,5 @@ constexpr static Vec3 VEC3_UP = Vec3 (0.0f, 1.0f, 0.0f);
 constexpr static Vec3 VEC3_DOWN = Vec3 (0.0f, -1.0f, 0.0f);
 constexpr static Vec3 VEC3_FORWARD = Vec3 (0.0f, 0.0f, 1.0f);
 constexpr static Vec3 VEC3_BACKWARD = Vec3 (0.0f, 0.0f, -1.0f);
+
+} // namespace cert

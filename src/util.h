@@ -6,6 +6,9 @@
 #include <limits>
 #include <type_traits>
 
+namespace cert
+{
+
 constexpr float debug_float (float in) { return in / 0.0f; }
 
 template <class T> constexpr T const& min (const T& a, const T& b) { return (b < a) ? b : a; }
@@ -17,8 +20,8 @@ template <class T> constexpr T const& clamp (const T& value, const T& min, const
 
 template <typename T> constexpr T abs (T num) { return num >= 0 ? num : -num; }
 
-
-constexpr float my_pow (float x, int n)
+constexpr float pow (float x, int n);
+constexpr float pow_recursive (float x, int n)
 {
 	if (n == 0) return 1.0;
 	if (n == 1) return x;
@@ -27,44 +30,35 @@ constexpr float my_pow (float x, int n)
 	{
 		if (n & 1)
 		{
-			return x * my_pow (x, n - 1);
+			return x * pow (x, n - 1);
 		}
 		else
 		{
-			return my_pow (x, n / 2) * my_pow (x, n / 2);
+			return pow (x, n / 2) * pow (x, n / 2);
 		}
 	}
 	else
 	{
-		return 1.0 / my_pow (x, -n);
+		return 1.0 / pow (x, -n);
 	}
 }
 
-constexpr float my_pow_iterative (float x, int n)
+constexpr float pow (float x, int n)
 {
-	if (n == 0) return 1.0;
-	if (n == 1) return x;
-	float m_x = 0;
-	int m_n = (n < 0) ? -n;
-	n;
-	while (m_n > 1)
+	double left = x;
+	double right = 1;
+
+	if (n < 0) return 1 / (x * pow (x, -n - 1));
+	if (n == 0) return 1;
+
+	while (n > 1)
 	{
-		if (m_n & 1)
-		{
-			m_x *= x;
-			m_n--;
-		}
-		else
-		{
-			m_x *= m_x;
-			m_n /= 2;
-		}
+		if (n % 2 == 1) right *= left;
+		left = left * left;
+		n = n / 2;
 	}
 
-	if (n < 0)
-		return 1.0 / m_x;
-	else
-		return m_x;
+	return left * right;
 }
 
 struct PRNG
@@ -255,8 +249,10 @@ inline float fast_sqrt (float number)
 
 	return y;
 }
+
 namespace detail
 {
+
 constexpr bool feq (float x, float y)
 {
 	return abs (x - y) <= std::numeric_limits<float>::epsilon ();
@@ -268,9 +264,7 @@ constexpr float trig_series (float x, float sum, float n, int i, int s, float t)
 	           sum :
 	           trig_series (x, sum + t * s / n, n * i * (i + 1), i + 2, -s, t * x * x);
 }
-
 } // namespace detail
-
 constexpr float sin (float x)
 {
 	float sum = x;
@@ -314,3 +308,12 @@ constexpr float cos (float x)
 	// return trig_series (x, 1.0f, 2.0f, 3, -1, x * x);
 }
 constexpr float tan (float x) { return sin (x) / cos (x); }
+
+struct UV
+{
+	float u = 0.f;
+	float v = 0.f;
+};
+
+
+} // namespace cert
