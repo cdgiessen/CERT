@@ -1,3 +1,27 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2015, 2016 Ben Deane
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+// Much of this work is derivative of Ben Deane's constexpr experiments.
 #pragma once
 
 #include <cstdint>
@@ -313,22 +337,36 @@ constexpr float tan (float x) { return sin (x) / cos (x); }
 
 namespace detail
 {
-float constexpr float asin_series (float x, float sum, int n, float t)
+// needs to be iterative to combat max constexpr depth
+constexpr float asin_series (float x, float sum, int n, float t)
 {
 	return nearly_equal (sum, sum + t * static_cast<float> (n) / (n + 2)) ?
 	           sum :
 	           asin_series (x,
 	               sum + t * static_cast<float> (n) / (n + 2),
 	               n + 2,
-	               t * x * x * static_cast<T> (n) / (n + 3));
+	               t * x * x * static_cast<float> (n) / (n + 3));
 }
 } // namespace detail
 constexpr float asin (float x)
 {
 	if (nearly_equal (x, -1.f)) return PI / -2.f;
 	if (nearly_equal (x, 1.f)) return PI / 2.f;
-	if (x > -1.f && x < 1.f) return detail::asin_series (x, x, 1, x * x * x / 2.f);
+	if (x > -1.f && x < 1.f)
+	{
+		// return detail::asin_series (x, x, 1, x * x * x / 2.f);
+		float sum = x;
+		int n = 1;
+		float t = x * x * x / 2.f;
+		while (!nearly_equal (sum, sum + t * static_cast<float> (n) / (n + 2)))
+		{
+			sum += t * static_cast<float> (n) / (n + 2);
+			n += 2;
+			t *= x * x * static_cast<float> (n) / (n + 3);
+		}
 
+		return sum;
+	}
 	// error
 	return 0.f / 0.f;
 }
@@ -344,22 +382,35 @@ constexpr float atan_term (float x2, int k)
 
 constexpr float atan_product (float x, int k)
 {
-	if (k == 1)
-		return atan_term (x * x, k);
-	else
-		return atan_term (x * x, k) * atan_product (x, k - 1);
+	float prod = 1.f;
+	while (k > 1)
+	{
+		prod *= atan_term (x * x, k);
+		k--;
+	}
+	return prod * atan_term (x * x, k);
 }
 
-constexpr float atan_sum (float x, float sum, int n)
+constexpr float atan_sum (float x)
 {
-	if (sum + atan_product (x, n) == sum)
-		return sum;
-	else
-		return atan_sum (x, sum + atan_product (x, n), n + 1);
+	float sum = 1.f;
+	int n = 1;
+	float prod = atan_product (x, n);
+	while (prod >= 0.01f)
+	{
+		sum += prod;
+		n++;
+		prod = atan_product (x, n);
+	}
+	return sum;
+	// if (atan_product (x, n) <= 0.001f)
+	// 	return sum;
+	// else
+	// 	return atan_sum (x, sum + atan_product (x, n), n + 1);
 }
 } // namespace detail
 
-constexpr float atan (float x) { return x / (1.f + x * x) * detail::atan_sum (x, 1.f, 1); }
+constexpr float atan (float x) { return x / (1.f + x * x) * detail::atan_sum (x); }
 
 constexpr float atan2 (float x, float y)
 {

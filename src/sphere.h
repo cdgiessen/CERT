@@ -37,8 +37,8 @@ class Sphere : public Shape
 
 	constexpr UV get_sphere_uv (Vec3 const& point) const
 	{
-		float phi = atan2 (p.z, p.x);
-		float theta = asin (p.y);
+		float phi = atan2 (point.z, point.x);
+		float theta = asin (point.y);
 		return { .u = 1.f - (phi + PI) / (2.f * PI), .v = (theta + PI / 2.f) / PI };
 	}
 
@@ -60,7 +60,7 @@ class Sphere : public Shape
 				out.p = r.point_at_parameter (out.t);
 				out.normal = normalize ((out.p - center));
 				out.mat = mat;
-				out.uv = get_sphere_uv ((out.p - center) / radius);
+				out.uv = { 0.f, 0.f }; // get_sphere_uv ((out.p - center) / radius);
 				return out;
 			}
 			float positive = (-b + sqrt (discriminant)) / a;
@@ -72,7 +72,7 @@ class Sphere : public Shape
 				out.p = r.point_at_parameter (out.t);
 				out.normal = normalize ((out.p - center));
 				out.mat = mat;
-				out.uv = get_sphere_uv ((out.p - center) / radius);
+				out.uv = { 0.f, 0.f }; // get_sphere_uv ((out.p - center) / radius);
 				return out;
 			}
 		}

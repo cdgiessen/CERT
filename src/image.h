@@ -21,7 +21,9 @@ template <typename T, std::size_t width, std::size_t height> struct OutputImage
 class Texture
 {
 	public:
-	constexpr Texture (int width, int height) { tex.resize (width * height); }
+	constexpr Texture (int width, int height) : width (width), height (height), tex (width * height)
+	{
+	}
 	constexpr void set (int x, int y, Vec3 const& value) { tex.at (x * width + y) = value; }
 	constexpr Vec3 get (int x, int y) const { return tex.at (x * width + y); }
 

@@ -33,6 +33,10 @@ struct World
 		{
 			delete lights.at (i);
 		}
+		for (int i = 0; i < textures.size (); i++)
+		{
+			delete textures.at (i);
+		}
 	}
 
 	constexpr Shape* add_shape (Shape* shape)

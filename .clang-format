@@ -44,6 +44,7 @@ SpacesInAngles: false
 SpacesInCStyleCastParentheses: false
 SpacesInContainerLiterals: false
 SpacesInParentheses: false
+SortIncludes: false
 Standard: Auto
 TabWidth: 4
 UseTab: ForIndentation

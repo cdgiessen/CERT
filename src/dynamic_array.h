@@ -25,15 +25,15 @@ template <typename T> class DynamicArray
 	{
 		if (m_data != nullptr) delete[] m_data;
 	}
-	DynamicArray (DynamicArray const& obj) = delete;
-	DynamicArray& operator= (DynamicArray const& obj) = delete;
+	constexpr DynamicArray (DynamicArray const& obj) = delete;
+	constexpr DynamicArray& operator= (DynamicArray const& obj) = delete;
 
-	DynamicArray (DynamicArray&& obj)
+	constexpr DynamicArray (DynamicArray&& obj)
 	: m_data (obj.m_data), m_size (obj.m_size), m_allocated (obj.m_allocated)
 	{
 		obj.m_data = nullptr;
 	}
-	DynamicArray& operator= (DynamicArray&& obj)
+	constexpr DynamicArray& operator= (DynamicArray&& obj)
 	{
 		m_data = obj.m_data;
 		m_size = obj.m_size;
@@ -74,15 +74,6 @@ template <typename T> class DynamicArray
 			delete[] m_data;
 			m_data = temp;
 			m_allocated = new_reserve;
-		}
-	}
-
-	constexpr T& set (std::size_t index, T value)
-	{
-		if (index < m_size)
-		{
-			m_data[index] = value;
-			return m_data[index];
 		}
 	}
 

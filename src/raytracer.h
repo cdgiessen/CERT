@@ -14,10 +14,10 @@
 
 constexpr int thread_count = 12;
 
-constexpr int width = 10 * thread_count;
-constexpr int height = 10 * thread_count;
-constexpr int samples = 3; // this value is squared!
-constexpr int max_bounces = 5;
+constexpr int width = 1 * thread_count;
+constexpr int height = 1 * thread_count;
+constexpr int samples = 2; // this value is squared!
+constexpr int max_bounces = 1;
 
 namespace cert
 {
@@ -89,7 +89,7 @@ constexpr void setup_scene (World& world)
 	auto checker_mat = world.add_material (new DiffuseTex (checker_tex));
 
 	world.add_shape (new Sphere (Vec3 (-2, 1, 0), 1.0, col1));
-	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, checker_mat));
+	world.add_shape (new Sphere (Vec3 (0, 1, 0), 1.0, col2));
 	world.add_shape (new Sphere (Vec3 (2, 1, 0), 1.0, col3));
 
 	world.add_light (new PointLight (Vec3 (2, 4, 2), VEC3_ONE, 15.0f));

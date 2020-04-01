@@ -5,7 +5,6 @@
 
 #include "image.h"
 
-#include <functional>
 namespace cert
 {
 struct ScatterOut
@@ -120,18 +119,18 @@ struct Dielectric : public Material
 	float ref_idx;
 };
 
-struct ProceduralDiffuse : public Material
-{
-	constexpr DiffuseTex (std::function<Vec3 (Vec3 point, Vec3 normal, UV uv)> func)
-	: Material (VEC3_ZERO), func (func)
-	{
-	}
-	constexpr virtual ScatterOut scatter (Vec3 point, Vec3 normal, UV uv, const Ray& r_in, PRNG& random) const
-	{
-		return { .is_scattered = false, .attenuation = func (point, normal, uv); };
-	}
-	std::function<Vec3 (Vec3 point, Vec3 normal, UV uv)> func;
-};
+// struct ProceduralDiffuse : public Material
+// {
+// 	constexpr ProceduralDiffuse (Vec3 (*func) (Vec3 point, Vec3 normal, UV uv))
+// 	: Material (VEC3_ZERO), func (func)
+// 	{
+// 	}
+// 	constexpr virtual ScatterOut scatter (Vec3 point, Vec3 normal, UV uv, const Ray& r_in, PRNG& random) const
+// 	{
+// 		return { .is_scattered = false, .attenuation = func (point, normal, uv) };
+// 	}
+// 	Vec3 (*func) (Vec3 point, Vec3 normal, UV uv);
+// };
 
 struct DiffuseTex : public Material
 {
